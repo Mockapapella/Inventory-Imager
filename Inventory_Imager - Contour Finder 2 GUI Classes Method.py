@@ -1,13 +1,19 @@
+#!/usr/bin/env python
+
 import cv2
 import numpy as np
 import math
 import os
 import glob
 import time
-import tkinter as tk
-from tkinter import ttk
-from tkinter import *
-from tkinter.filedialog import askdirectory
+try:
+	import tkinter as tk
+	from tkinter import ttk
+	from tkinter.filedialog import askdirectory
+except:
+	import Tkinter as tk
+	import ttk
+	from tkFileDialog import askdirectory
 from PIL import Image
 from PIL import ImageTk
 from operator import itemgetter
@@ -77,7 +83,7 @@ def findSignificantContours(img, sobel_8u, largest_contour_allowed):
 	# From among them, find the contours with large surface area.
 	significant = []
 	# If contour isn't covering 5% of total area of image then it probably is too small
-	tooSmall = sobel_8u.size * largest_contour_allowed / 100 
+	tooSmall = sobel_8u.size * largest_contour_allowed / 100
 	for tupl in level1:
 		contour = contours[tupl[0]];
 		area = cv2.contourArea(contour)
@@ -91,16 +97,16 @@ def findSignificantContours(img, sobel_8u, largest_contour_allowed):
 def segment(path, blur2, largest_contour_allowed, edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation):
 	#Taken from https://gist.github.com/Munawwar/0efcacfb43827ba3a6bac3356315c419
 	#And here http://www.codepasta.com/site/vision/segmentation/
-	
+
 	img = path
-	
+
 	blurred = cv2.GaussianBlur(img, (blur2, blur2), 0) # Remove noise, 7,7
-	
+
 	# Edge operator
 	canny = np.max(np.array([CannyEdge2(blurred[:,:, 0], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation),
-						CannyEdge2(blurred[:,:, 1], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation), 
+						CannyEdge2(blurred[:,:, 1], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation),
 						CannyEdge2(blurred[:,:, 2], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation)]), axis=0)
-	
+
 	# Noise reduction trick, from http://sourceforge.net/p/octave/image/ci/default/tree/inst/edge.m#l182
 	mean = np.mean(canny)
 
@@ -112,7 +118,7 @@ def segment(path, blur2, largest_contour_allowed, edge_detector_2_lower_bound, e
 
 	# Find contours
 	significant = findSignificantContours(img,
-										  sobel_8u, 
+										  sobel_8u,
 										  largest_contour_allowed)
 
 	# Mask
@@ -138,7 +144,7 @@ def SquareImage(image, filename, output_filepath):
 	img1 = image
 	height = np.size(img1,0)
 	width = np.size(img1,1)
-	
+
 	if height > width:
 		desired_size = height
 	elif width > height:
@@ -233,7 +239,7 @@ def run_the_code(input_filepath,
 					cv2.imwrite(os.path.join(dirname, filename_array_item), square_image)
 				else:
 					cv2.imwrite(os.path.join(output_filepath, filename_array_item), square_image)
-				
+
 				#--Update the images on display in the window--#
 				lbl1.load(Image.open(filename))
 
@@ -343,7 +349,7 @@ def run_the_code_once(input_filepath,
 					cv2.imwrite(os.path.join(dirname, filename_array_item), square_image)
 				else:
 					cv2.imwrite(os.path.join(output_filepath, filename_array_item), square_image)
-				
+
 				#--Update the images on display in the window--#
 				lbl1.load(Image.open(filename))
 
@@ -385,7 +391,10 @@ def run_the_code_once(input_filepath,
 
 #--Tkinter--#
 master = tk.Tk()
-master.iconbitmap("Logo.ico")
+try:
+	master.iconbitmap("Logo.ico")
+except:
+	pass
 master.wm_title("Inventory Imager")
 
 #Functions
@@ -410,7 +419,7 @@ def popupmsg_Edge_Detector_1():
 	B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
 	B1.pack(pady=10, padx=10)
 	popup.mainloop()
-	
+
 def popupmsg_padding():
 	popup = tk.Tk()
 	popup.iconbitmap("Logo.ico")
@@ -421,7 +430,7 @@ def popupmsg_padding():
 	B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
 	B1.pack(pady=10, padx=10)
 	popup.mainloop()
-	
+
 def popupmsg_Edge_Detector_2():
 	popup = tk.Tk()
 	popup.iconbitmap("Logo.ico")
@@ -432,7 +441,7 @@ def popupmsg_Edge_Detector_2():
 	B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
 	B1.pack(pady=10, padx=10)
 	popup.mainloop()
-	
+
 def popupmsg_dilate():
 	popup = tk.Tk()
 	popup.iconbitmap("Logo.ico")
@@ -443,7 +452,7 @@ def popupmsg_dilate():
 	B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
 	B1.pack(pady=10, padx=10)
 	popup.mainloop()
-	
+
 def popupmsg_contour():
 	popup = tk.Tk()
 	popup.iconbitmap("Logo.ico")
@@ -454,7 +463,7 @@ def popupmsg_contour():
 	B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
 	B1.pack(pady=10, padx=10)
 	popup.mainloop()
-	
+
 def popupmsg_Blur_2():
 	popup = tk.Tk()
 	popup.iconbitmap("Logo.ico")
@@ -642,27 +651,27 @@ def define_scale2():
 #Rounds the "Edge Detector 1" values to the nearest whole number
 def round_number5():
 	scaleVal5.set(round(scaleVal5.get(), 2))
-	
+
 def round_number6():
 	scaleVal6.set(round(scaleVal6.get(), 2))
 
-#Rounds the "Edge Detector 2" values to the nearest whole number	
+#Rounds the "Edge Detector 2" values to the nearest whole number
 def round_number7():
 	scaleVal7.set(round(scaleVal7.get(), 2))
-	
+
 def round_number8():
 	scaleVal8.set(round(scaleVal8.get(), 2))
 
-#Rounds the "Padding" values to the nearest whole number	
+#Rounds the "Padding" values to the nearest whole number
 def round_number9():
 	scaleVal9.set(round(scaleVal9.get(), 2))
-	
+
 def round_number10():
 	scaleVal10.set(round(scaleVal10.get(), 2))
-	
+
 def round_number11():
 	scaleVal11.set(round(scaleVal11.get(), 2))
-	
+
 def round_number12():
 	scaleVal12.set(round(scaleVal12.get(), 2))
 
@@ -670,7 +679,7 @@ def round_number12():
 '''
 Info Menu
 '''
-menubar = Menu(master)
+menubar = tk.Menu(master)
 Info = tk.Menu(menubar, tearoff=0)
 Info.add_command(label="Largest Contour Allowed", command=lambda: popupmsg_contour())
 Info.add_command(label="Dilate", command=lambda: popupmsg_dilate())
@@ -700,57 +709,57 @@ Each section of code below is separated by their row placement within the GUI
 '''
 
 #Input
-ttk.Button(master, text="Input", command=lambda: input_directory()).grid(row=0, column=29, sticky=NSEW)
-e1 = Entry(master)
-e1.grid(row=0, column=0, pady=4, padx=4, sticky=EW, columnspan=29)
+ttk.Button(master, text="Input", command=lambda: input_directory()).grid(row=0, column=29, sticky="nsew")
+e1 = tk.Entry(master)
+e1.grid(row=0, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
 
 #Output
-ttk.Button(master, text="Output", command=lambda: output_directory()).grid(row=1, column=29, sticky=NSEW)
-e2 = Entry(master)
-e2.grid(row=1, column=0, pady=4, padx=4, sticky=EW, columnspan=29)
+ttk.Button(master, text="Output", command=lambda: output_directory()).grid(row=1, column=29, sticky="nsew")
+e2 = tk.Entry(master)
+e2.grid(row=1, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
 
 #Layer under input and output
-checkVar1 = IntVar()
+checkVar1 = tk.IntVar()
 checkVar1.set(1)
-checkVal1 = Checkbutton(master, text="Make Square", variable=checkVar1)
-checkVal1.grid(row=4, column=0, sticky=EW)
-Label(master, text="Options").grid(row=4, column=2)
-Label(master, text="Current").grid(row=4, column=5)
+checkVal1 = tk.Checkbutton(master, text="Make Square", variable=checkVar1)
+checkVal1.grid(row=4, column=0, sticky='ew')
+tk.Label(master, text="Options").grid(row=4, column=2)
+tk.Label(master, text="Current").grid(row=4, column=5)
 ttk.Button(master, text="Set Defaults", command=lambda: reset_sliders()).grid(row=4, column=4)
 
 master.grid_columnconfigure(2, weight=1)
 
 #Largest Contours Allowed
 master.grid_rowconfigure(5, weight=1)
-Label(master, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract1()).grid(row=6, column=0, sticky=E)
-Label(master, text="1").grid(row=6, column=1, sticky=E)
+tk.Label(master, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract1()).grid(row=6, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=6, column=1, sticky=tk.E)
 scaleVal1 = tk.IntVar()
 scaleVal1.set(5)
-scaleVar1 = ttk.Scale(master, from_="1", to="100", orient=HORIZONTAL, variable=scaleVal1, command=lambda _: round_number1())
-scaleVar1.grid(row=6, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="100").grid(row=6, column=3)
+scaleVar1 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal1, command=lambda _: round_number1())
+scaleVar1.grid(row=6, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="100").grid(row=6, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add1()).grid(row=6, column=4)
-Label(master, textvariable=scaleVal1).grid(row=6, column=5)
+tk.Label(master, textvariable=scaleVal1).grid(row=6, column=5)
 
 #Dilate
 master.grid_rowconfigure(7, weight=1)
-Label(master, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract2()).grid(row=8, column=0, sticky=E)
-Label(master, text="1").grid(row=8, column=1, sticky=E)
+tk.Label(master, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract2()).grid(row=8, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=8, column=1, sticky=tk.E)
 scaleVal2 = tk.IntVar()
 scaleVal2.set(3)
-scaleVar2 = ttk.Scale(master, from_="1", to="20", orient=HORIZONTAL, variable=scaleVal2, command=lambda _: round_number2())
-scaleVar2.grid(row=8, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="20").grid(row=8, column=3)
+scaleVar2 = ttk.Scale(master, from_="1", to="20", orient=tk.HORIZONTAL, variable=scaleVal2, command=lambda _: round_number2())
+scaleVar2.grid(row=8, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="20").grid(row=8, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add2()).grid(row=8, column=4)
-Label(master, textvariable=scaleVal2).grid(row=8, column=5)
+tk.Label(master, textvariable=scaleVal2).grid(row=8, column=5)
 
 #Blurred 1
 master.grid_rowconfigure(9, weight=1)
-Label(master, text="Blur 1 (Default: 7)").grid(row=9, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract3()).grid(row=10, column=0, stick=E)
-Label(master, text="1").grid(row=10, column=1, sticky=E)
+tk.Label(master, text="Blur 1 (Default: 7)").grid(row=9, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract3()).grid(row=10, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=10, column=1, sticky=tk.E)
 scaleVal3 = tk.IntVar()
 scaleVal3.set(7)
 '''
@@ -758,17 +767,17 @@ This variable must be global so the blur1 scale has some way of knowing what val
 '''
 global previous_number1
 previous_number1 = define_scale1()
-scaleVar3 = ttk.Scale(master, from_="1", to="99", orient=HORIZONTAL, variable=scaleVal3, command=lambda _: round_number3(previous_number1))
-scaleVar3.grid(row=10, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="99").grid(row=10, column=3)
+scaleVar3 = ttk.Scale(master, from_="1", to="99", orient=tk.HORIZONTAL, variable=scaleVal3, command=lambda _: round_number3(previous_number1))
+scaleVar3.grid(row=10, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="99").grid(row=10, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add3()).grid(row=10, column=4)
-Label(master, textvariable=scaleVal3).grid(row=10, column=5)
+tk.Label(master, textvariable=scaleVal3).grid(row=10, column=5)
 
 #Blurred 2
 master.grid_rowconfigure(11, weight=1)
-Label(master, text="Blur 2 (Default: 7)").grid(row=11, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract4()).grid(row=12, column=0, sticky=E)
-Label(master, text="1").grid(row=12, column=1, sticky=E)
+tk.Label(master, text="Blur 2 (Default: 7)").grid(row=11, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract4()).grid(row=12, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=12, column=1, sticky=tk.E)
 scaleVal4 = tk.IntVar()
 scaleVal4.set(7)
 '''
@@ -776,103 +785,83 @@ This variable must be global so the blur2 scale has some way of knowing what val
 '''
 global previous_number2
 previous_number2 = define_scale2()
-scaleVar4 = ttk.Scale(master, from_="1", to="99", orient=HORIZONTAL, variable=scaleVal4, command=lambda _: round_number4(previous_number2))
-scaleVar4.grid(row=12, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="99").grid(row=12, column=3)
+scaleVar4 = ttk.Scale(master, from_="1", to="99", orient=tk.HORIZONTAL, variable=scaleVal4, command=lambda _: round_number4(previous_number2))
+scaleVar4.grid(row=12, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="99").grid(row=12, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add4()).grid(row=12, column=4)
-Label(master, textvariable=scaleVal4).grid(row=12, column=5)
+tk.Label(master, textvariable=scaleVal4).grid(row=12, column=5)
 
 #Edge Detector 1
 master.grid_rowconfigure(13, weight=1)
-Label(master, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract5()).grid(row=14, column=0, sticky=E)
-Label(master, text="1").grid(row=14, column=1, sticky=E)
+tk.Label(master, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract5()).grid(row=14, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=14, column=1, sticky=tk.E)
 scaleVal5 = tk.IntVar()
 scaleVal5.set(100)
-scaleVar5 = ttk.Scale(master, from_="1", to="300", orient=HORIZONTAL, variable=scaleVal5, command=lambda _: round_number5())
-scaleVar5.grid(row=14, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="300").grid(row=14, column=3)
+scaleVar5 = ttk.Scale(master, from_="1", to="300", orient=tk.HORIZONTAL, variable=scaleVal5, command=lambda _: round_number5())
+scaleVar5.grid(row=14, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="300").grid(row=14, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add5()).grid(row=14, column=4)
-Label(master, textvariable=scaleVal5).grid(row=14, column=5)
+tk.Label(master, textvariable=scaleVal5).grid(row=14, column=5)
 
-ttk.Button(master, text="-", command=lambda: onClick_Subtract6()).grid(row=15, column=0, sticky=E)
-Label(master, text="1").grid(row=15, column=1, sticky=E)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract6()).grid(row=15, column=0, sticky=tk.E)
+tk.Label(master, text="1").grid(row=15, column=1, sticky=tk.E)
 scaleVal6 = tk.IntVar()
 scaleVal6.set(180)
-scaleVar6 = ttk.Scale(master, from_="1", to="300", orient=HORIZONTAL, variable=scaleVal6, command=lambda _: round_number6())
-scaleVar6.grid(row=15, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="300").grid(row=15, column=3)
+scaleVar6 = ttk.Scale(master, from_="1", to="300", orient=tk.HORIZONTAL, variable=scaleVal6, command=lambda _: round_number6())
+scaleVar6.grid(row=15, column=2, sticky='ew', ipadx=0, ipady=0)
+tk.Label(master, text="300").grid(row=15, column=3)
 ttk.Button(master, text="+", command=lambda: onClick_Add6()).grid(row=15, column=4)
-Label(master, textvariable=scaleVal6).grid(row=15, column=5)
+tk.Label(master, textvariable=scaleVal6).grid(row=15, column=5)
 
 #Edge Detector 2
-master.grid_rowconfigure(16, weight=1)
-Label(master, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract7()).grid(row=17, column=0, sticky=E)
-Label(master, text="1").grid(row=17, column=1, sticky=E)
+master.grid_rowconfigure(16, weight=1)tk.Label(master, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract7()).grid(row=17, column=0, sticky=tk.E)tk.Label(master, text="1").grid(row=17, column=1, sticky=tk.E)
 scaleVal7 = tk.IntVar()
 scaleVal7.set(20)
-scaleVar7 = ttk.Scale(master, from_="1", to="100", orient=HORIZONTAL, variable=scaleVal7, command=lambda _: round_number7())
-scaleVar7.grid(row=17, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="100").grid(row=17, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add7()).grid(row=17, column=4)
-Label(master, textvariable=scaleVal7).grid(row=17, column=5)
+scaleVar7 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal7, command=lambda _: round_number7())
+scaleVar7.grid(row=17, column=2, sticky='ew', ipadx=0, ipady=0)tk.Label(master, text="100").grid(row=17, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add7()).grid(row=17, column=4)tk.Label(master, textvariable=scaleVal7).grid(row=17, column=5)
 
-ttk.Button(master, text="-", command=lambda: onClick_Subtract8()).grid(row=18, column=0, sticky=E)
-Label(master, text="1").grid(row=18, column=1, sticky=E)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract8()).grid(row=18, column=0, sticky=tk.E)tk.Label(master, text="1").grid(row=18, column=1, sticky=tk.E)
 scaleVal8 = tk.IntVar()
 scaleVal8.set(40)
-scaleVar8 = ttk.Scale(master, from_="1", to="100", orient=HORIZONTAL, variable=scaleVal8, command=lambda _: round_number8())
-scaleVar8.grid(row=18, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="100").grid(row=18, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add8()).grid(row=18, column=4)
-Label(master, textvariable=scaleVal8).grid(row=18, column=5)
+scaleVar8 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal8, command=lambda _: round_number8())
+scaleVar8.grid(row=18, column=2, sticky='ew', ipadx=0, ipady=0)tk.Label(master, text="100").grid(row=18, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add8()).grid(row=18, column=4)tk.Label(master, textvariable=scaleVal8).grid(row=18, column=5)
 
 #Final Image Padding
-master.grid_rowconfigure(19, weight=1)
-Label(master, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract9()).grid(row=20, column=0, sticky=E)
-Label(master, text="0").grid(row=20, column=1, sticky=E)
+master.grid_rowconfigure(19, weight=1)tk.Label(master, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=tk.S)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract9()).grid(row=20, column=0, sticky=tk.E)tk.Label(master, text="0").grid(row=20, column=1, sticky=tk.E)
 scaleVal9 = tk.IntVar()
 scaleVal9.set(5)
-scaleVar9 = ttk.Scale(master, from_="0", to="40", orient=HORIZONTAL, variable=scaleVal9, command=lambda _: round_number9())
-scaleVar9.grid(row=20, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="40").grid(row=20, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add9()).grid(row=20, column=4)
-Label(master, textvariable=scaleVal9).grid(row=20, column=5)
+scaleVar9 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal9, command=lambda _: round_number9())
+scaleVar9.grid(row=20, column=2, sticky='ew', ipadx=0, ipady=0)tk.Label(master, text="40").grid(row=20, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add9()).grid(row=20, column=4)tk.Label(master, textvariable=scaleVal9).grid(row=20, column=5)
 
-ttk.Button(master, text="-", command=lambda: onClick_Subtract10()).grid(row=21, column=0, sticky=E)
-Label(master, text="0").grid(row=21, column=1, sticky=E)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract10()).grid(row=21, column=0, sticky=tk.E)tk.Label(master, text="0").grid(row=21, column=1, sticky=tk.E)
 scaleVal10 = tk.IntVar()
 scaleVal10.set(5)
-scaleVar10 = ttk.Scale(master, from_="0", to="40", orient=HORIZONTAL, variable=scaleVal10, command=lambda _: round_number10())
-scaleVar10.grid(row=21, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="40").grid(row=21, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add10()).grid(row=21, column=4)
-Label(master, textvariable=scaleVal10).grid(row=21, column=5)
+scaleVar10 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal10, command=lambda _: round_number10())
+scaleVar10.grid(row=21, column=2, stick='ew', ipadx=0, ipady=0)tk.Label(master, text="40").grid(row=21, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add10()).grid(row=21, column=4)tk.Label(master, textvariable=scaleVal10).grid(row=21, column=5)
 
-ttk.Button(master, text="-", command=lambda: onClick_Subtract11()).grid(row=22, column=0, sticky=E)
-Label(master, text="0").grid(row=22, column=1, sticky=E)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract11()).grid(row=22, column=0, sticky=tk.E)tk.Label(master, text="0").grid(row=22, column=1, sticky=tk.E)
 scaleVal11 = tk.IntVar()
 scaleVal11.set(5)
-scaleVar11 = ttk.Scale(master, from_="0", to="40", orient=HORIZONTAL, variable=scaleVal11, command=lambda _: round_number11())
-scaleVar11.grid(row=22, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="40").grid(row=22, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add11()).grid(row=22, column=4)
-Label(master, textvariable=scaleVal11).grid(row=22, column=5)
+scaleVar11 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal11, command=lambda _: round_number11())
+scaleVar11.grid(row=22, column=2, stick='ew', ipadx=0, ipady=0)tk.Label(master, text="40").grid(row=22, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add11()).grid(row=22, column=4)tk.Label(master, textvariable=scaleVal11).grid(row=22, column=5)
 
-ttk.Button(master, text="-", command=lambda: onClick_Subtract12()).grid(row=23, column=0, sticky=E)
-Label(master, text="0").grid(row=23, column=1, sticky=E)
+ttk.Button(master, text="-", command=lambda: onClick_Subtract12()).grid(row=23, column=0, sticky=tk.E)tk.Label(master, text="0").grid(row=23, column=1, sticky=tk.E)
 scaleVal12 = tk.IntVar()
 scaleVal12.set(5)
-scaleVar12 = ttk.Scale(master, from_="0", to="40", orient=HORIZONTAL, variable=scaleVal12, command=lambda _: round_number12())
-scaleVar12.grid(row=23, column=2, stick=EW, ipadx=0, ipady=0)
-Label(master, text="40").grid(row=23, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add12()).grid(row=23, column=4)
-Label(master, textvariable=scaleVal12).grid(row=23, column=5)
+scaleVar12 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal12, command=lambda _: round_number12())
+scaleVar12.grid(row=23, column=2, stick='ew', ipadx=0, ipady=0)tk.Label(master, text="40").grid(row=23, column=3)
+ttk.Button(master, text="+", command=lambda: onClick_Add12()).grid(row=23, column=4)tk.Label(master, textvariable=scaleVal12).grid(row=23, column=5)
 
 #Lower Buttons
-ttk.Button(master, text='Quit', command=master.quit).grid(row=24, column=0, sticky=EW)
+ttk.Button(master, text='Quit', command=master.quit).grid(row=24, column=0, sticky='ew')
 ttk.Button(master, text='Activate', command=lambda: run_the_code(e1.get(),
 																 e2.get(),
 																 checkVar1.get(),
@@ -887,7 +876,7 @@ ttk.Button(master, text='Activate', command=lambda: run_the_code(e1.get(),
 																 int(scaleVar9.get()),
 																 int(scaleVar10.get()),
 																 int(scaleVar11.get()),
-																 int(scaleVar12.get()))).grid(row=24, column=2, sticky=E, pady=4, padx=4)
+																 int(scaleVar12.get()))).grid(row=24, column=2, sticky=tk.E, pady=4, padx=4)
 ttk.Button(master, text='Preview', command=lambda: run_the_code_once(e1.get(),
 																	 e2.get(),
 																	 checkVar1.get(),
@@ -902,13 +891,13 @@ ttk.Button(master, text='Preview', command=lambda: run_the_code_once(e1.get(),
 																	 int(scaleVar9.get()),
 																	 int(scaleVar10.get()),
 																	 int(scaleVar11.get()),
-																	 int(scaleVar12.get()))).grid(row=24, column=3, sticky=EW, pady=4, columnspan=2)
+																	 int(scaleVar12.get()))).grid(row=24, column=3, sticky='ew', pady=4, columnspan=2)
 
 #Images
 master.grid_columnconfigure(7, weight=1)
 
-ttk.Separator(master, orient=VERTICAL).grid(row=2, column=6, rowspan=23, sticky=NS)
-ttk.Separator(master, orient=HORIZONTAL).grid(row=11, column=6, columnspan=24, sticky=EW)
+ttk.Separator(master, orient=tk.VERTICAL).grid(row=2, column=6, rowspan=23, sticky='ns')
+ttk.Separator(master, orient=tk.HORIZONTAL).grid(row=11, column=6, columnspan=24, sticky='ew')
 
 class Mockapapella1(tk.Label):
 	''' a Label that resizes the contained image'''
@@ -937,7 +926,7 @@ class Mockapapella1(tk.Label):
 
 
 lbl1 = Mockapapella1()
-lbl1.grid(row=3, column=7, sticky=N, pady=4, padx=4, rowspan=8, columnspan=23)
+lbl1.grid(row=3, column=7, sticky=tk.N, pady=4, padx=4, rowspan=8, columnspan=23)
 
 class Mockapapella2(tk.Label):
 	''' a Label that resizes the contained image'''
@@ -965,7 +954,7 @@ class Mockapapella2(tk.Label):
 		self.config(image=self.photoimage)
 
 lbl2 = Mockapapella2()
-lbl2.grid(row=13, column=7, sticky=N, pady=4, padx=4, rowspan=10, columnspan=23)
+lbl2.grid(row=13, column=7, sticky=tk.N, pady=4, padx=4, rowspan=10, columnspan=23)
 
 master.geometry("960x600")
-mainloop()
+master.mainloop()
