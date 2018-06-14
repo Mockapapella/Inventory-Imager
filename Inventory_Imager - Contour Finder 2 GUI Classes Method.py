@@ -391,13 +391,7 @@ def run_the_code_once(input_filepath,
 			print(e)
 	finished_processing()
 
-#--Tkinter--#
-master = tk.Tk()
-try:
-	master.iconbitmap("Logo.ico")
-except:
-	pass
-master.wm_title("Inventory Imager")
+
 
 #https://stackoverflow.com/questions/26598010/how-do-i-create-a-button-in-python-tkinter-to-increase-integer-variable-by-1-and
 #Add 1 value to the scale every time a button is clicked
@@ -564,6 +558,40 @@ def round_number11():
 def round_number12():
 	scaleVal12.set(round(scaleVal12.get(), 2))
 
+class Slider(ttk.Scale):
+	def __init__(self, master=None, row=None, **kwargs):
+		btn = ttk.Button(master, text="-", command=self.subtract)
+		btn.grid(row=row, column=0, sticky=tk.E)
+		lbl = tk.Label(master, text=kwargs['from_'])
+		lbl.grid(row=row, column=1, sticky=tk.E)
+		self.scaleVal = tk.IntVar()
+		ttk.Scale.__init__(self, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, **kwargs)
+		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
+		lbl = tk.Label(master, text="100")
+		lbl.grid(row=row, column=3)
+		btn = ttk.Button(master, text="+", command=self.add)
+		btn.grid(row=row, column=4)
+		lbl = tk.Label(master, textvariable=self.scaleVal)
+		lbl.grid(row=row, column=5)
+		master.grid_rowconfigure(row, weight=1)
+
+	def validate(self, *args):
+		print(args)
+
+	def subtract(self):
+		self.scaleVal.set(self.scaleVal.get()-1)
+
+	def add(self):
+		self.scaleVal.set(self.scaleVal.get()+1)
+
+#--Tkinter--#
+master = tk.Tk()
+try:
+	master.iconbitmap("Logo.ico")
+except:
+	pass
+master.wm_title("Inventory Imager")
+
 #Menu
 '''
 Info Menu
@@ -621,16 +649,17 @@ master.grid_columnconfigure(2, weight=1)
 #Largest Contours Allowed
 master.grid_rowconfigure(5, weight=1)
 tk.Label(master, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract1()).grid(row=6, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=6, column=1, sticky=tk.E)
-scaleVal1 = tk.IntVar()
-scaleVal1.set(5)
-scaleVar1 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal1, command=lambda _: round_number1())
-scaleVar1.grid(row=6, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="100").grid(row=6, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add1()).grid(row=6, column=4)
-tk.Label(master, textvariable=scaleVal1).grid(row=6, column=5)
-
+contour = Slider(master, row=6, from_=1, to=100)
+# ~ ttk.Button(master, text="-", command=lambda: onClick_Subtract1()).grid(row=6, column=0, sticky=tk.E)
+# ~ tk.Label(master, text="1").grid(row=6, column=1, sticky=tk.E)
+# ~ scaleVal1 = tk.IntVar()
+# ~ scaleVal1.set(5)
+# ~ scaleVar1 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal1, command=lambda _: round_number1())
+# ~ scaleVar1.grid(row=6, column=2, sticky='ew', ipadx=0, ipady=0)
+# ~ tk.Label(master, text="100").grid(row=6, column=3)
+# ~ ttk.Button(master, text="+", command=lambda: onClick_Add1()).grid(row=6, column=4)
+# ~ tk.Label(master, textvariable=scaleVal1).grid(row=6, column=5)
+# ~ Slider(master)
 #Dilate
 master.grid_rowconfigure(7, weight=1)
 tk.Label(master, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=tk.S)
