@@ -559,12 +559,14 @@ def round_number12():
 	scaleVal12.set(round(scaleVal12.get(), 2))
 
 class Slider(ttk.Scale):
-	def __init__(self, master=None, row=None, **kwargs):
+	def __init__(self, master=None, row=None, step=1, **kwargs):
+		self.step = step
+		self.default = kwargs.get('value', 0)
 		btn = ttk.Button(master, text="-", command=self.subtract)
 		btn.grid(row=row, column=0, sticky=tk.E)
 		lbl = tk.Label(master, text=kwargs['from_'])
 		lbl.grid(row=row, column=1, sticky=tk.E)
-		self.scaleVal = tk.IntVar()
+		self.scaleVal = tk.IntVar(value=self.default)
 		ttk.Scale.__init__(self, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, **kwargs)
 		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
 		lbl = tk.Label(master, text="100")
@@ -575,14 +577,14 @@ class Slider(ttk.Scale):
 		lbl.grid(row=row, column=5)
 		master.grid_rowconfigure(row, weight=1)
 
-	def validate(self, *args):
-		print(args)
+	def validate(self, args):
+		self.scaleVal.set((int(float(args))-self.default)//self.step*self.step+self.default)
 
 	def subtract(self):
-		self.scaleVal.set(self.scaleVal.get()-1)
+		self.set(self.get()-self.step)
 
 	def add(self):
-		self.scaleVal.set(self.scaleVal.get()+1)
+		self.set(self.get()+self.step)
 
 #--Tkinter--#
 master = tk.Tk()
@@ -649,154 +651,42 @@ master.grid_columnconfigure(2, weight=1)
 #Largest Contours Allowed
 master.grid_rowconfigure(5, weight=1)
 tk.Label(master, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
-contour = Slider(master, row=6, from_=1, to=100)
-# ~ ttk.Button(master, text="-", command=lambda: onClick_Subtract1()).grid(row=6, column=0, sticky=tk.E)
-# ~ tk.Label(master, text="1").grid(row=6, column=1, sticky=tk.E)
-# ~ scaleVal1 = tk.IntVar()
-# ~ scaleVal1.set(5)
-# ~ scaleVar1 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal1, command=lambda _: round_number1())
-# ~ scaleVar1.grid(row=6, column=2, sticky='ew', ipadx=0, ipady=0)
-# ~ tk.Label(master, text="100").grid(row=6, column=3)
-# ~ ttk.Button(master, text="+", command=lambda: onClick_Add1()).grid(row=6, column=4)
-# ~ tk.Label(master, textvariable=scaleVal1).grid(row=6, column=5)
-# ~ Slider(master)
+contour = Slider(master, row=6, from_=1, to=100, value=5)
+
 #Dilate
 master.grid_rowconfigure(7, weight=1)
 tk.Label(master, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract2()).grid(row=8, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=8, column=1, sticky=tk.E)
-scaleVal2 = tk.IntVar()
-scaleVal2.set(3)
-scaleVar2 = ttk.Scale(master, from_="1", to="20", orient=tk.HORIZONTAL, variable=scaleVal2, command=lambda _: round_number2())
-scaleVar2.grid(row=8, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="20").grid(row=8, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add2()).grid(row=8, column=4)
-tk.Label(master, textvariable=scaleVal2).grid(row=8, column=5)
+dialate = Slider(master, row=8, from_=1, to=20, value=3)
 
 #Blurred 1
 master.grid_rowconfigure(9, weight=1)
 tk.Label(master, text="Blur 1 (Default: 7)").grid(row=9, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract3()).grid(row=10, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=10, column=1, sticky=tk.E)
-scaleVal3 = tk.IntVar()
-scaleVal3.set(7)
-'''
-This variable must be global so the blur1 scale has some way of knowing what value it previously held
-'''
-global previous_number1
-previous_number1 = define_scale1()
-scaleVar3 = ttk.Scale(master, from_="1", to="99", orient=tk.HORIZONTAL, variable=scaleVal3, command=lambda _: round_number3(previous_number1))
-scaleVar3.grid(row=10, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="99").grid(row=10, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add3()).grid(row=10, column=4)
-tk.Label(master, textvariable=scaleVal3).grid(row=10, column=5)
+blurred1 = Slider(master, row=10, from_=1, to=99, value=7, step=2)
 
 #Blurred 2
 master.grid_rowconfigure(11, weight=1)
 tk.Label(master, text="Blur 2 (Default: 7)").grid(row=11, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract4()).grid(row=12, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=12, column=1, sticky=tk.E)
-scaleVal4 = tk.IntVar()
-scaleVal4.set(7)
-'''
-This variable must be global so the blur2 scale has some way of knowing what value it previously held
-'''
-global previous_number2
-previous_number2 = define_scale2()
-scaleVar4 = ttk.Scale(master, from_="1", to="99", orient=tk.HORIZONTAL, variable=scaleVal4, command=lambda _: round_number4(previous_number2))
-scaleVar4.grid(row=12, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="99").grid(row=12, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add4()).grid(row=12, column=4)
-tk.Label(master, textvariable=scaleVal4).grid(row=12, column=5)
+blurred2 = Slider(master, row=12, from_=1, to=99, value=7, step=2)
 
 #Edge Detector 1
 master.grid_rowconfigure(13, weight=1)
 tk.Label(master, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract5()).grid(row=14, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=14, column=1, sticky=tk.E)
-scaleVal5 = tk.IntVar()
-scaleVal5.set(100)
-scaleVar5 = ttk.Scale(master, from_="1", to="300", orient=tk.HORIZONTAL, variable=scaleVal5, command=lambda _: round_number5())
-scaleVar5.grid(row=14, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="300").grid(row=14, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add5()).grid(row=14, column=4)
-tk.Label(master, textvariable=scaleVal5).grid(row=14, column=5)
-
-ttk.Button(master, text="-", command=lambda: onClick_Subtract6()).grid(row=15, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=15, column=1, sticky=tk.E)
-scaleVal6 = tk.IntVar()
-scaleVal6.set(180)
-scaleVar6 = ttk.Scale(master, from_="1", to="300", orient=tk.HORIZONTAL, variable=scaleVal6, command=lambda _: round_number6())
-scaleVar6.grid(row=15, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="300").grid(row=15, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add6()).grid(row=15, column=4)
-tk.Label(master, textvariable=scaleVal6).grid(row=15, column=5)
+edge_detect1a = Slider(master, row=14, from_=1, to=99, value=100)
+edge_detect1b = Slider(master, row=15, from_=1, to=99, value=180)
 
 #Edge Detector 2
 master.grid_rowconfigure(16, weight=1)
 tk.Label(master, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract7()).grid(row=17, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=17, column=1, sticky=tk.E)
-scaleVal7 = tk.IntVar()
-scaleVal7.set(20)
-scaleVar7 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal7, command=lambda _: round_number7())
-scaleVar7.grid(row=17, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="100").grid(row=17, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add7()).grid(row=17, column=4)
-tk.Label(master, textvariable=scaleVal7).grid(row=17, column=5)
-
-ttk.Button(master, text="-", command=lambda: onClick_Subtract8()).grid(row=18, column=0, sticky=tk.E)
-tk.Label(master, text="1").grid(row=18, column=1, sticky=tk.E)
-scaleVal8 = tk.IntVar()
-scaleVal8.set(40)
-scaleVar8 = ttk.Scale(master, from_="1", to="100", orient=tk.HORIZONTAL, variable=scaleVal8, command=lambda _: round_number8())
-scaleVar8.grid(row=18, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="100").grid(row=18, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add8()).grid(row=18, column=4)
-tk.Label(master, textvariable=scaleVal8).grid(row=18, column=5)
+edge_detect2a = Slider(master, row=17, from_=1, to=99, value=20)
+edge_detect2b = Slider(master, row=18, from_=1, to=99, value=40)
 
 #Final Image Padding
 master.grid_rowconfigure(19, weight=1)
 tk.Label(master, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=tk.S)
-ttk.Button(master, text="-", command=lambda: onClick_Subtract9()).grid(row=20, column=0, sticky=tk.E)
-tk.Label(master, text="0").grid(row=20, column=1, sticky=tk.E)
-scaleVal9 = tk.IntVar()
-scaleVal9.set(5)
-scaleVar9 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal9, command=lambda _: round_number9())
-scaleVar9.grid(row=20, column=2, sticky='ew', ipadx=0, ipady=0)
-tk.Label(master, text="40").grid(row=20, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add9()).grid(row=20, column=4)
-tk.Label(master, textvariable=scaleVal9).grid(row=20, column=5)
-
-ttk.Button(master, text="-", command=lambda: onClick_Subtract10()).grid(row=21, column=0, sticky=tk.E)
-tk.Label(master, text="0").grid(row=21, column=1, sticky=tk.E)
-scaleVal10 = tk.IntVar()
-scaleVal10.set(5)
-scaleVar10 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal10, command=lambda _: round_number10())
-scaleVar10.grid(row=21, column=2, stick='ew', ipadx=0, ipady=0)
-tk.Label(master, text="40").grid(row=21, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add10()).grid(row=21, column=4)
-tk.Label(master, textvariable=scaleVal10).grid(row=21, column=5)
-
-ttk.Button(master, text="-", command=lambda: onClick_Subtract11()).grid(row=22, column=0, sticky=tk.E)
-tk.Label(master, text="0").grid(row=22, column=1, sticky=tk.E)
-scaleVal11 = tk.IntVar()
-scaleVal11.set(5)
-scaleVar11 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal11, command=lambda _: round_number11())
-scaleVar11.grid(row=22, column=2, stick='ew', ipadx=0, ipady=0)
-tk.Label(master, text="40").grid(row=22, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add11()).grid(row=22, column=4)
-tk.Label(master, textvariable=scaleVal11).grid(row=22, column=5)
-
-ttk.Button(master, text="-", command=lambda: onClick_Subtract12()).grid(row=23, column=0, sticky=tk.E)
-tk.Label(master, text="0").grid(row=23, column=1, sticky=tk.E)
-scaleVal12 = tk.IntVar()
-scaleVal12.set(5)
-scaleVar12 = ttk.Scale(master, from_="0", to="40", orient=tk.HORIZONTAL, variable=scaleVal12, command=lambda _: round_number12())
-scaleVar12.grid(row=23, column=2, stick='ew', ipadx=0, ipady=0)
-tk.Label(master, text="40").grid(row=23, column=3)
-ttk.Button(master, text="+", command=lambda: onClick_Add12()).grid(row=23, column=4)
-tk.Label(master, textvariable=scaleVal12).grid(row=23, column=5)
+padding_n = Slider(master, row=20, from_=1, to=40, value=5)
+padding_s = Slider(master, row=21, from_=1, to=40, value=5)
+padding_e = Slider(master, row=22, from_=1, to=40, value=5)
+padding_w = Slider(master, row=23, from_=1, to=40, value=5)
 
 #Lower Buttons
 ttk.Button(master, text='Quit', command=master.quit).grid(row=24, column=0, sticky='ew')
