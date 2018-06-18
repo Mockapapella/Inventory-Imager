@@ -7,6 +7,7 @@ import os
 import glob
 from PIL import Image, ImageTk
 from operator import itemgetter
+from functools import partial
 
 def CannyEdge1(image, filename, blur_value, edge_detector_1_lower_bound, edge_detector_1_upper_bound):
 	#--Bolt Image and convert to Gray--#
@@ -156,6 +157,12 @@ def SquareImage(image, filename, output_filepath):
 
 	return new_img1
 
+def log(queue, *text):
+	data = ' '.join(map(str, text))
+	print(data)
+	if queue:
+		queue.put(data)
+
 def run_the_code(input_filepath,
 				 output_filepath,
 				 square_checkbox,
@@ -171,27 +178,28 @@ def run_the_code(input_filepath,
 				 padding_S,
 				 padding_W,
 				 padding_E,
-				 queue,
+				 queue=None,
+				 status_q=None,
 				 preview=False):
 
+	slog = partial(log, status_q)
 	if input_filepath == "":
 		input_filepath_error()
 		return
 	if blur1 %2 == 0 or blur2 %2 == 0:
 		blur_error()
 		return
-	i=1
-	for filename in glob.glob(os.path.join(input_filepath, "*.jpg")):
+	files = glob.glob(os.path.join(input_filepath, "*.jpg"))
+	for i, filename in enumerate(files, 1):
+		fn = "{} ({}/{})".format(os.path.basename(filename), i, len(files))
 		try:
-			print("Finding, cropping, and optimizing image number {}".format(i))
-			i+=1
-			#Apply canny edge detection
+			slog(fn, "- Apply canny edge detection")
 			canny_inv = CannyEdge1(filename,
 											   filename,
 											   blur1,
 											   edge_detector_1_lower_bound,
 											   edge_detector_1_upper_bound)
-			#Crop image to item size
+			slog(fn, "- Crop image to item size")
 			img_crop = ImageItemCrop(canny_inv,
 												 filename,
 												 padding_N,
@@ -207,6 +215,8 @@ def run_the_code(input_filepath,
 									   dilation)
 			unsquare_image = Combination(mask,
 													 img_crop_copy)
+
+			slog(fn, "- saving")
 			if square_checkbox == 1:
 				square_image = SquareImage(unsquare_image,
 														   filename,
@@ -261,6 +271,6 @@ def run_the_code(input_filepath,
 			if preview:
 				break
 		except Exception as e:
-			print(e)
+			slog("ERROR:", e)
 	queue.put('finished')
 

@@ -187,6 +187,18 @@ class Mockapapella(tk.Label):
 		self.config(image=self.photoimage)
 		self.after(150, lambda: self.bind('<Configure>', self.resize_and_display))
 
+class StatusBar(tk.Label):
+	def __init__(self, master=None, queue=None, **kwargs):
+		tk.Label.__init__(self, master, **kwargs)
+		self.check_queue()
+
+	def check_queue(self):
+		if not self.master.status_q.empty():
+			data = self.master.status_q.get()
+			color = 'red' if data.lower().startswith('error') else 'black'
+			self.config(text=data, fg=color)
+		self.after(100, self.check_queue)
+
 class Images(tk.Frame):
 	def __init__(self, master=None, **kwargs):
 		tk.Frame.__init__(self, master, **kwargs)
@@ -233,8 +245,9 @@ class GUI(tk.Tk):
 		self.columnconfigure(2, weight=1) # images column gets all leftover horizontal space
 		self.rowconfigure(2, weight=1) # options row gets all leftover vertical space
 
-		# set up the Queue to use for the images
-		self.queue = Queue()
+
+		self.queue = Queue() # set up the Queue to use for the images
+		self.status_q = Queue() # set up the Queue to use for status messages
 
 		self.config(menu=Menubar(self))
 
@@ -254,8 +267,11 @@ class GUI(tk.Tk):
 		lower = LowerButtons(self)
 		lower.grid(row=3, column=0, pady=4)
 
-		self.images = Images(self)
-		self.images.grid(row=2, column=2, rowspan=2, sticky='nsew')
+		images = Images(self)
+		images.grid(row=2, column=2, rowspan=2, sticky='nsew')
+
+		status = StatusBar(self, text='Ready', wrap=900)
+		status.grid(row=4, column=0, columnspan=3, sticky='w')
 
 	def run_the_code(self, preview=False):
 		args = (
@@ -275,6 +291,7 @@ class GUI(tk.Tk):
 			self.options.padding_e.get(),
 			self.options.padding_w.get(),
 			self.queue,
+			self.status_q,
 			preview)
 		t = Thread(target=ip.run_the_code, args=args)
 		t.daemon = True
