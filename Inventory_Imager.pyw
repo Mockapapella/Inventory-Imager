@@ -47,7 +47,7 @@ class Slider(ttk.Scale):
 	def __init__(self, master=None, row=None, step=1, **kwargs):
 		self.step = step
 		self.default = kwargs.get('value', 0)
-		btn = ttk.Button(master, text="-", command=self.subtract)
+		btn = ttk.Button(master, text="-", width=2, command=self.subtract)
 		btn.grid(row=row, column=0, sticky=tk.E)
 		lbl = tk.Label(master, text=kwargs['from_'])
 		lbl.grid(row=row, column=1, sticky=tk.E)
@@ -57,7 +57,7 @@ class Slider(ttk.Scale):
 		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
 		lbl = tk.Label(master, text="100")
 		lbl.grid(row=row, column=3)
-		btn = ttk.Button(master, text="+", command=self.add)
+		btn = ttk.Button(master, text="+", width=2, command=self.add)
 		btn.grid(row=row, column=4)
 		lbl = tk.Label(master, textvariable=self.scaleVal)
 		lbl.grid(row=row, column=5)
