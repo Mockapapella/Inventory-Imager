@@ -298,10 +298,10 @@ def run_the_code_once(input_filepath,
 				 	  padding_E):
 
 	if input_filepath == "":
-		input_filepath_error()
+		popupmsg.input_filepath_error()
 		return
 	if blur1 %2 == 0 or blur2 %2 == 0:
-		blur_error()
+		popupmsg.blur_error()
 		return
 	i=1
 	for filename in glob.glob(os.path.join(input_filepath, "*.jpg")):
@@ -389,7 +389,8 @@ def run_the_code_once(input_filepath,
 			break
 		except Exception as e:
 			print(e)
-	finished_processing()
+			raise
+	popupmsg.finished_processing()
 
 def reset_sliders():
 	for slider in Slider.sliders:
@@ -404,12 +405,6 @@ def output_directory():
 	output_directory = askdirectory(initialdir = os.getcwd(),title = "Select file")
 	e2.delete(0, tk.END)
 	e2.insert(0, output_directory)
-
-def define_scale1():
-	return scaleVal3.get()
-
-def define_scale2():
-	return scaleVal4.get()
 
 class Slider(ttk.Scale):
 	sliders = []
@@ -483,14 +478,17 @@ Each section of code below is separated by their row placement within the GUI
 '''
 
 #Input
-ttk.Button(master, text="Input", command=lambda: input_directory()).grid(row=0, column=29, sticky="nsew")
+ttk.Button(master, text="Input", command=input_directory).grid(row=0, column=29, sticky="nsew")
 e1 = tk.Entry(master)
 e1.grid(row=0, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
+e1.insert(0, "Input") # default
 
 #Output
-ttk.Button(master, text="Output", command=lambda: output_directory()).grid(row=1, column=29, sticky="nsew")
+ttk.Button(master, text="Output", command=output_directory).grid(row=1, column=29, sticky="nsew")
 e2 = tk.Entry(master)
 e2.grid(row=1, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
+e2.insert(0, "Output") # default
+
 
 #Layer under input and output
 checkVar1 = tk.IntVar()
@@ -560,21 +558,23 @@ ttk.Button(master, text='Activate', command=lambda: run_the_code(e1.get(),
 																 int(scaleVar10.get()),
 																 int(scaleVar11.get()),
 																 int(scaleVar12.get()))).grid(row=24, column=2, sticky=tk.E, pady=4, padx=4)
-ttk.Button(master, text='Preview', command=lambda: run_the_code_once(e1.get(),
-																	 e2.get(),
-																	 checkVar1.get(),
-																	 int(scaleVar1.get()),
-																	 int(scaleVar2.get()),
-																	 int(scaleVar3.get()),
-																	 int(scaleVar4.get()),
-																	 int(scaleVar5.get()),
-																	 int(scaleVar6.get()),
-																	 int(scaleVar7.get()),
-																	 int(scaleVar8.get()),
-																	 int(scaleVar9.get()),
-																	 int(scaleVar10.get()),
-																	 int(scaleVar11.get()),
-																	 int(scaleVar12.get()))).grid(row=24, column=3, sticky='ew', pady=4, columnspan=2)
+btn = ttk.Button(master, text='Preview', command=lambda: run_the_code_once(
+	e1.get(),
+	e2.get(),
+	checkVar1.get(),
+	int(contour.get()),
+	int(dialate.get()),
+	int(blurred1.get()),
+	int(blurred2.get()),
+	int(edge_detect1a.get()),
+	int(edge_detect1b.get()),
+	int(edge_detect2a.get()),
+	int(edge_detect2b.get()),
+	int(padding_n.get()),
+	int(padding_s.get()),
+	int(padding_e.get()),
+	int(padding_w.get())))
+btn.grid(row=24, column=3, sticky='ew', pady=4, columnspan=2)
 
 #Images
 master.grid_columnconfigure(7, weight=1)
@@ -582,7 +582,7 @@ master.grid_columnconfigure(7, weight=1)
 ttk.Separator(master, orient=tk.VERTICAL).grid(row=2, column=6, rowspan=23, sticky='ns')
 ttk.Separator(master, orient=tk.HORIZONTAL).grid(row=11, column=6, columnspan=24, sticky='ew')
 
-class Mockapapella1(tk.Label):
+class Mockapapella(tk.Label):
 	''' a Label that resizes the contained image'''
 	def __init__(self, master=None, **kwargs):
 		tk.Label.__init__(self, master, **kwargs)
@@ -607,37 +607,11 @@ class Mockapapella1(tk.Label):
 		self.photoimage = ImageTk.PhotoImage(new_img) # allows garbage collection of the old photoimage
 		self.config(image=self.photoimage)
 
+lbl1 = Mockapapella(master)
+lbl1.grid(row=3, column=7, sticky='nsew', pady=4, padx=4, rowspan=8, columnspan=23)
 
-lbl1 = Mockapapella1()
-lbl1.grid(row=3, column=7, sticky=tk.N, pady=4, padx=4, rowspan=8, columnspan=23)
-
-class Mockapapella2(tk.Label):
-	''' a Label that resizes the contained image'''
-	def __init__(self, master=None, **kwargs):
-		tk.Label.__init__(self, master, **kwargs)
-		self.original_image = None
-		self.photoimage = None
-		self.bind('<Configure>', self.resize_and_display)
-
-	def load(self, image):
-		''' load an image
-		image: is a PIL Image instance'''
-		self.original_image = image # this replaces any reference to the previous image, to allow garbage collection
-		image_width, image_height = self.original_image.size
-		self.resize_and_display()
-
-	def resize_and_display(self, event=None):
-		if self.original_image is None:
-			return # nothing to do
-
-		# easy resize code lets PIL do the work with the thumbnail method
-		new_img = self.original_image.copy()
-		new_img.thumbnail((self.winfo_width(), self.winfo_height()))
-		self.photoimage = ImageTk.PhotoImage(new_img) # allows garbage collection of the old photoimage
-		self.config(image=self.photoimage)
-
-lbl2 = Mockapapella2()
-lbl2.grid(row=13, column=7, sticky=tk.N, pady=4, padx=4, rowspan=10, columnspan=23)
+lbl2 = Mockapapella(master)
+lbl2.grid(row=13, column=7, sticky='nsew', pady=4, padx=4, rowspan=10, columnspan=23)
 
 master.geometry("960x600")
 master.mainloop()
