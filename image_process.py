@@ -190,6 +190,8 @@ def run_the_code(input_filepath,
 		blur_error()
 		return
 	files = glob.glob(os.path.join(input_filepath, "*.jpg"))
+	if preview:
+		del files[1:] # preview just uses the first image
 	for i, filename in enumerate(files, 1):
 		fn = "{} ({}/{})".format(os.path.basename(filename), i, len(files))
 		try:
@@ -244,7 +246,8 @@ def run_the_code(input_filepath,
 				square_image = Image.fromarray(square_image)
 
 				#--Update the images on display in the window--#
-				queue.put((Image.open(filename), square_image))
+				if queue:
+					queue.put((Image.open(filename), square_image))
 
 			elif square_checkbox == 0:
 				#--Save Processed Image--#
@@ -267,10 +270,10 @@ def run_the_code(input_filepath,
 				b,g,r = cv2.split(unsquare_image)
 				unsquare_image = cv2.merge((r,g,b))
 				unsquare_image = Image.fromarray(unsquare_image)
-				queue.put((Image.open(filename), unsquare_image))
-			if preview:
-				break
+				if queue:
+					queue.put((Image.open(filename), unsquare_image))
 		except Exception as e:
 			slog("ERROR:", e)
-	queue.put('finished')
+	if queue:
+		queue.put('finished')
 
