@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 try:
+	# try the python2 imports
 	import tkinter as tk
 	from tkinter import ttk
 	from tkinter.filedialog import askdirectory
-except:
+except ImportError:
+	# try python3 imports
 	import Tkinter as tk
 	import ttk
 	from tkFileDialog import askdirectory
+import os
 from PIL import Image, ImageTk
 from queue import Queue
 from threading import Thread
@@ -15,47 +18,29 @@ from threading import Thread
 import popupmsg
 import image_process as ip
 
-def run_the_code(preview=False):
-	args = (
-		e1.get(),
-		e2.get(),
-		checkVar1.get(),
-		contour.get(),
-		dialate.get(),
-		blurred1.get(),
-		blurred2.get(),
-		edge_detect1a.get(),
-		edge_detect1b.get(),
-		edge_detect2a.get(),
-		edge_detect2b.get(),
-		padding_n.get(),
-		padding_s.get(),
-		padding_e.get(),
-		padding_w.get(),
-		queue,
-		preview)
-	t = Thread(target=ip.run_the_code, args=args)
-	t.daemon = True
-	t.start()
+class DirInput(tk.Frame):
+	def __init__(self, master=None, **kwargs):
+		tk.Frame.__init__(self, master, **kwargs)
+		self.columnconfigure(0, weight=1)
 
-def run_the_code_once():
-	'''a common way to reuse a chunk of code with one small difference is to
-	use a variable "flag", in this case the preview variable'''
-	run_the_code(preview=True)
+		#Input
+		self.inputdir = tk.Entry(self)
+		self.inputdir.grid(row=0, column=0, pady=4, padx=4, sticky="ew")
+		self.inputdir.insert(0, "Input") # default value
+		btn = ttk.Button(self, text="Input", command=lambda: self.get_dir(self.inputdir))
+		btn.grid(row=0, column=1)
 
-def reset_sliders():
-	for slider in Slider.sliders:
-		slider.set(slider.default)
+		#Output
+		self.outputdir = tk.Entry(self)
+		self.outputdir.grid(row=1, column=0, pady=4, padx=4, sticky="ew")
+		self.outputdir.insert(0, "Output") # default value
+		btn = ttk.Button(self, text="Output", command=lambda: self.get_dir(self.outputdir))
+		btn.grid(row=1, column=1)
 
-def input_directory():
-	input_directory = askdirectory(initialdir = os.getcwd(),title = "Select file")
-	e1.delete(0, tk.END)
-	e1.insert(0, input_directory)
-
-def output_directory():
-	output_directory = askdirectory(initialdir = os.getcwd(),title = "Select file")
-	e2.delete(0, tk.END)
-	e2.insert(0, output_directory)
+	def get_dir(self, widget):
+		directory = askdirectory(initialdir=os.getcwd(), title = "Select file")
+		widget.delete(0, tk.END)
+		widget.insert(0, directory)
 
 class Slider(ttk.Scale):
 	sliders = []
@@ -68,7 +53,7 @@ class Slider(ttk.Scale):
 		lbl.grid(row=row, column=1, sticky=tk.E)
 		self.scaleVal = tk.IntVar(value=self.default)
 		self.get = self.scaleVal.get
-		ttk.Scale.__init__(self, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, **kwargs)
+		ttk.Scale.__init__(self, master, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, length=400, **kwargs)
 		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
 		lbl = tk.Label(master, text="100")
 		lbl.grid(row=row, column=3)
@@ -88,132 +73,101 @@ class Slider(ttk.Scale):
 	def add(self):
 		self.set(self.get()+self.step)
 
-#--Tkinter--#
-master = tk.Tk()
-try:
-	master.iconbitmap("Logo.ico")
-except:
-	pass
-master.wm_title("Inventory Imager")
+	@classmethod
+	def reset_all(cls):
+		for slider in cls.sliders:
+			slider.set(slider.default)
 
-#Menu
-'''
-Info Menu
-'''
-menubar = tk.Menu(master)
-Info = tk.Menu(menubar, tearoff=0)
-Info.add_command(label="Largest Contour Allowed", command=popupmsg.contour)
-Info.add_command(label="Dilate", command=popupmsg.dilate)
-Info.add_command(label="Blur 1", command=popupmsg.Blur_1)
-Info.add_command(label="Blur 2", command=popupmsg.Blur_2)
-Info.add_command(label="Edge Detector 1", command=popupmsg.Edge_Detector_1)
-Info.add_command(label="Edge Detector 2", command=popupmsg.Edge_Detector_2)
-Info.add_command(label="Padding", command=popupmsg.padding)
-Info.add_separator()
-Info.add_command(label="Exit", command=quit)
-menubar.add_cascade(label="Info", menu=Info)
+class Menubar(tk.Menu):
+	def __init__(self, master=None, **kwargs):
+		tk.Menu.__init__(self, master, **kwargs)
 
-'''
-Profiles Menu
-'''
-Profiles = tk.Menu(menubar, tearoff=0)
-Profiles.add_command(label="Profile 1")
-Profiles.add_command(label="Profile 2")
-Profiles.add_command(label="Profile 3")
-Profiles.add_separator()
-Profiles.add_command(label="Add Profile")
-menubar.add_cascade(label="Profiles", menu=Profiles)
-master.config(menu=menubar)
+		# Info Menu
+		Info = tk.Menu(self, tearoff=0)
+		Info.add_command(label="Largest Contour Allowed", command=popupmsg.contour)
+		Info.add_command(label="Dilate", command=popupmsg.dilate)
+		Info.add_command(label="Blur 1", command=popupmsg.Blur_1)
+		Info.add_command(label="Blur 2", command=popupmsg.Blur_2)
+		Info.add_command(label="Edge Detector 1", command=popupmsg.Edge_Detector_1)
+		Info.add_command(label="Edge Detector 2", command=popupmsg.Edge_Detector_2)
+		Info.add_command(label="Padding", command=popupmsg.padding)
+		Info.add_separator()
+		Info.add_command(label="Exit", command=quit)
+		self.add_cascade(label="Info", menu=Info)
 
-'''
-Each section of code below is separated by their row placement within the GUI
-'''
+		# Profiles Menu
+		Profiles = tk.Menu(self, tearoff=0)
+		Profiles.add_command(label="Profile 1")
+		Profiles.add_command(label="Profile 2")
+		Profiles.add_command(label="Profile 3")
+		Profiles.add_separator()
+		Profiles.add_command(label="Add Profile")
+		self.add_cascade(label="Profiles", menu=Profiles)
 
-#Input
-ttk.Button(master, text="Input", command=input_directory).grid(row=0, column=29, sticky="nsew")
-e1 = tk.Entry(master)
-e1.grid(row=0, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
-e1.insert(0, "Input") # default
+class Options(ttk.LabelFrame):
+	def __init__(self, master=None, **kwargs):
+		ttk.LabelFrame.__init__(self, master, text="Options", **kwargs)
 
-#Output
-ttk.Button(master, text="Output", command=output_directory).grid(row=1, column=29, sticky="nsew")
-e2 = tk.Entry(master)
-e2.grid(row=1, column=0, pady=4, padx=4, sticky='ew', columnspan=29)
-e2.insert(0, "Output") # default
+		#Layer under input and output
+		self.checkVar1 = tk.IntVar()
+		self.checkVar1.set(1)
+		checkVal1 = tk.Checkbutton(self, text="Make Square", variable=self.checkVar1)
+		checkVal1.grid(row=1, column=0, columnspan=4, sticky='w')
+		btn = ttk.Button(self, text="Reset All to Defaults", command=Slider.reset_all)
+		btn.place(relx=1, rely=0, anchor='ne')
 
+		#Largest Contours Allowed
+		tk.Label(self, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
+		self.contour = Slider(self, row=6, from_=1, to=100, value=5)
 
-#Layer under input and output
-checkVar1 = tk.IntVar()
-checkVar1.set(1)
-checkVal1 = tk.Checkbutton(master, text="Make Square", variable=checkVar1)
-checkVal1.grid(row=4, column=0, sticky='ew')
-tk.Label(master, text="Options").grid(row=4, column=2)
-tk.Label(master, text="Current").grid(row=4, column=5)
-ttk.Button(master, text="Set Defaults", command=reset_sliders).grid(row=4, column=4)
+		#Dilate
+		tk.Label(self, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=tk.S)
+		self.dialate = Slider(self, row=8, from_=1, to=20, value=3)
 
-master.grid_columnconfigure(2, weight=1)
+		#Blurred 1
+		tk.Label(self, text="Blur 1 (Default: 7)").grid(row=9, column=2, sticky=tk.S)
+		self.blurred1 = Slider(self, row=10, from_=1, to=99, value=7, step=2)
 
-#Largest Contours Allowed
-master.grid_rowconfigure(5, weight=1)
-tk.Label(master, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
-contour = Slider(master, row=6, from_=1, to=100, value=5)
+		#Blurred 2
+		tk.Label(self, text="Blur 2 (Default: 7)").grid(row=11, column=2, sticky=tk.S)
+		self.blurred2 = Slider(self, row=12, from_=1, to=99, value=7, step=2)
 
-#Dilate
-master.grid_rowconfigure(7, weight=1)
-tk.Label(master, text="Dilate (Default: 3)").grid(row=7, column=2, sticky=tk.S)
-dialate = Slider(master, row=8, from_=1, to=20, value=3)
+		#Edge Detector 1
+		tk.Label(self, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=tk.S)
+		self.edge_detect1a = Slider(self, row=14, from_=1, to=300, value=100)
+		self.edge_detect1b = Slider(self, row=15, from_=1, to=300, value=180)
 
-#Blurred 1
-master.grid_rowconfigure(9, weight=1)
-tk.Label(master, text="Blur 1 (Default: 7)").grid(row=9, column=2, sticky=tk.S)
-blurred1 = Slider(master, row=10, from_=1, to=99, value=7, step=2)
+		#Edge Detector 2
+		tk.Label(self, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=tk.S)
+		self.edge_detect2a = Slider(self, row=17, from_=1, to=100, value=20)
+		self.edge_detect2b = Slider(self, row=18, from_=1, to=100, value=40)
 
-#Blurred 2
-master.grid_rowconfigure(11, weight=1)
-tk.Label(master, text="Blur 2 (Default: 7)").grid(row=11, column=2, sticky=tk.S)
-blurred2 = Slider(master, row=12, from_=1, to=99, value=7, step=2)
+		#Final Image Padding
+		tk.Label(self, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=tk.S)
+		self.padding_n = Slider(self, row=20, from_=1, to=40, value=5)
+		self.padding_s = Slider(self, row=21, from_=1, to=40, value=5)
+		self.padding_e = Slider(self, row=22, from_=1, to=40, value=5)
+		self.padding_w = Slider(self, row=23, from_=1, to=40, value=5)
 
-#Edge Detector 1
-master.grid_rowconfigure(13, weight=1)
-tk.Label(master, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=tk.S)
-edge_detect1a = Slider(master, row=14, from_=1, to=300, value=100)
-edge_detect1b = Slider(master, row=15, from_=1, to=300, value=180)
+class LowerButtons(tk.Frame):
+	def __init__(self, master=None, **kwargs):
+		tk.Frame.__init__(self, master, **kwargs)
 
-#Edge Detector 2
-master.grid_rowconfigure(16, weight=1)
-tk.Label(master, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=tk.S)
-edge_detect2a = Slider(master, row=17, from_=1, to=100, value=20)
-edge_detect2b = Slider(master, row=18, from_=1, to=100, value=40)
+		btn = ttk.Button(self, text='Quit', command=master.quit)
+		btn.pack(side=tk.LEFT)
 
-#Final Image Padding
-master.grid_rowconfigure(19, weight=1)
-tk.Label(master, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=tk.S)
-padding_n = Slider(master, row=20, from_=1, to=40, value=5)
-padding_s = Slider(master, row=21, from_=1, to=40, value=5)
-padding_e = Slider(master, row=22, from_=1, to=40, value=5)
-padding_w = Slider(master, row=23, from_=1, to=40, value=5)
+		btn=ttk.Button(self, text='Activate', command=master.run_the_code)
+		btn.pack(side=tk.LEFT)
 
-#Lower Buttons
-ttk.Button(master, text='Quit', command=master.quit).grid(row=24, column=0, sticky='ew')
-
-btn=ttk.Button(master, text='Activate', command=run_the_code)
-btn.grid(row=24, column=2, sticky=tk.E, pady=4, padx=4)
-
-btn = ttk.Button(master, text='Preview', command=run_the_code_once)
-btn.grid(row=24, column=3, sticky='ew', pady=4, columnspan=2)
-
-#Images
-master.grid_columnconfigure(7, weight=1)
-
-ttk.Separator(master, orient=tk.VERTICAL).grid(row=2, column=6, rowspan=23, sticky='ns')
+		btn = ttk.Button(self, text='Preview', command=master.run_the_code_once)
+		btn.pack(side=tk.LEFT)
 
 class Mockapapella(tk.Label):
 	''' a Label that resizes the contained image'''
 	def __init__(self, master=None, **kwargs):
-		tk.Label.__init__(self, master, **kwargs)
+		tk.Label.__init__(self, master, bg='white', **kwargs)
 		self.original_image = None
 		self.photoimage = None
-		#~
 
 	def load(self, image):
 		''' load an image
@@ -231,38 +185,109 @@ class Mockapapella(tk.Label):
 		new_img.thumbnail((self.winfo_width()-10, self.winfo_height()-10))
 		self.photoimage = ImageTk.PhotoImage(new_img) # allows garbage collection of the old photoimage
 		self.config(image=self.photoimage)
-		self.after(100, lambda: self.bind('<Configure>', self.resize_and_display))
+		self.after(150, lambda: self.bind('<Configure>', self.resize_and_display))
 
-image_frame = tk.Frame(master)
-image_frame.grid(row=3, column=7, rowspan=50, columnspan=50, sticky='nsew')
-image_frame.rowconfigure(0, weight=1)
-image_frame.columnconfigure(0, weight=1)
-image_frame.rowconfigure(2, weight=1)
+class Images(tk.Frame):
+	def __init__(self, master=None, **kwargs):
+		tk.Frame.__init__(self, master, **kwargs)
 
-lbl1 = Mockapapella(image_frame)
-lbl1.grid(row=0, column=0, sticky='nsew', pady=4, padx=4)
+		self.rowconfigure(0, weight=1)
+		self.columnconfigure(0, weight=1)
+		self.rowconfigure(2, weight=1)
 
-sep=ttk.Separator(image_frame, orient=tk.HORIZONTAL)
-sep.grid(row=1, column=0, sticky='ew')
+		self.lbl1 = Mockapapella(self)
+		self.lbl1.grid(row=0, column=0, sticky='nsew', pady=4, padx=4)
 
-lbl2 = Mockapapella(image_frame)
-lbl2.grid(row=2, column=0, sticky='nsew', pady=4, padx=4)
+		sep=ttk.Separator(self, orient=tk.HORIZONTAL)
+		sep.grid(row=1, column=0, sticky='ew')
 
-# set up the Queue to use for the images
-queue = Queue()
-def check_queue():
-	'''checks the queue every 100 milliseconds to see if the image labels need to be updated'''
-	if not queue.empty():
-		item = queue.get()
-		if item == "finished":
-			popupmsg.finished_processing()
-		else:
-			img1, img2 = item
-			lbl1.load(img1)
-			lbl2.load(img2)
+		self.lbl2 = Mockapapella(self)
+		self.lbl2.grid(row=2, column=0, sticky='nsew', pady=4, padx=4)
 
-	master.after(100, check_queue)
-check_queue()
+		self.check_queue()
 
-master.geometry("960x600")
-master.mainloop()
+	def check_queue(self):
+		'''checks the queue every 100 milliseconds to see if the image labels need to be updated'''
+		if not self.master.queue.empty():
+			item = self.master.queue.get()
+			if item == "finished":
+				popupmsg.finished_processing()
+			else:
+				img1, img2 = item
+				self.lbl1.load(img1)
+				self.lbl2.load(img2)
+
+		self.after(100, self.check_queue)
+
+class GUI(tk.Tk):
+	def __init__(self, **kwargs):
+		tk.Tk.__init__(self, **kwargs)
+
+		try:
+			self.iconbitmap("Logo.ico")
+		except:
+			print("Linux sucks")
+		self.title("Inventory Imager")
+		self.geometry("960x600")
+
+		self.columnconfigure(2, weight=1) # images column gets all leftover horizontal space
+		self.rowconfigure(2, weight=1) # options row gets all leftover vertical space
+
+		# set up the Queue to use for the images
+		self.queue = Queue()
+
+		self.config(menu=Menubar(self))
+
+		self.directories = DirInput(self)
+		self.directories.grid(row=0, column=0, columnspan=3, sticky='ew')
+
+		# I think these are ugly, but go ahead and uncomment them if you want
+		#~ sep = ttk.Separator(self, orient=tk.HORIZONTAL)
+		#~ sep.grid(row=1, column=0, columnspan=3, sticky='ew', pady=4)
+
+		self.options = Options(self)
+		self.options.grid(row=2, column=0, padx=4, pady=4, sticky='nsew')
+
+		#~ sep = ttk.Separator(self, orient=tk.VERTICAL)
+		#~ sep.grid(row=1, column=1, rowspan=3, sticky='ns')
+
+		lower = LowerButtons(self)
+		lower.grid(row=3, column=0, pady=4)
+
+		self.images = Images(self)
+		self.images.grid(row=2, column=2, rowspan=2, sticky='nsew')
+
+	def run_the_code(self, preview=False):
+		args = (
+			self.directories.inputdir.get(),
+			self.directories.outputdir.get(),
+			self.options.checkVar1.get(),
+			self.options.contour.get(),
+			self.options.dialate.get(),
+			self.options.blurred1.get(),
+			self.options.blurred2.get(),
+			self.options.edge_detect1a.get(),
+			self.options.edge_detect1b.get(),
+			self.options.edge_detect2a.get(),
+			self.options.edge_detect2b.get(),
+			self.options.padding_n.get(),
+			self.options.padding_s.get(),
+			self.options.padding_e.get(),
+			self.options.padding_w.get(),
+			self.queue,
+			preview)
+		t = Thread(target=ip.run_the_code, args=args)
+		t.daemon = True
+		t.start()
+
+	def run_the_code_once(self):
+		'''a common way to reuse a chunk of code with one small difference is to
+		use a variable "flag", in this case the preview variable'''
+		self.run_the_code(preview=True)
+
+def main():
+	root = GUI()
+	root.mainloop()
+
+if __name__ == '__main__':
+	main()
