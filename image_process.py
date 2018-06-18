@@ -262,5 +262,5 @@ def run_the_code(input_filepath,
 				break
 		except Exception as e:
 			print(e)
+	queue.put('finished')
 
-                       

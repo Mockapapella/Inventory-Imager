@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-#~ import cv2
-#~ import numpy as np
-#~ import math
-#~ import os
-#~ import glob
-#~ import time
 try:
 	import tkinter as tk
 	from tkinter import ttk
@@ -15,14 +9,14 @@ except:
 	import ttk
 	from tkFileDialog import askdirectory
 from PIL import Image, ImageTk
-#~ from operator import itemgetter
 from queue import Queue
+from threading import Thread
 
 import popupmsg
 import image_process as ip
 
 def run_the_code(preview=False):
-	ip.run_the_code(
+	args = (
 		e1.get(),
 		e2.get(),
 		checkVar1.get(),
@@ -40,8 +34,9 @@ def run_the_code(preview=False):
 		int(padding_w.get()),
 		queue,
 		preview)
-
-	popupmsg.finished_processing()
+	t = Thread(target=ip.run_the_code, args=args)
+	t.daemon = True
+	t.start()
 
 def run_the_code_once():
 	run_the_code(preview=True)
@@ -208,7 +203,6 @@ btn.grid(row=24, column=3, sticky='ew', pady=4, columnspan=2)
 master.grid_columnconfigure(7, weight=1)
 
 ttk.Separator(master, orient=tk.VERTICAL).grid(row=2, column=6, rowspan=23, sticky='ns')
-ttk.Separator(master, orient=tk.HORIZONTAL).grid(row=11, column=6, columnspan=24, sticky='ew')
 
 class Mockapapella(tk.Label):
 	''' a Label that resizes the contained image'''
@@ -216,7 +210,7 @@ class Mockapapella(tk.Label):
 		tk.Label.__init__(self, master, **kwargs)
 		self.original_image = None
 		self.photoimage = None
-		self.bind('<Configure>', self.resize_and_display)
+		#~
 
 	def load(self, image):
 		''' load an image
@@ -228,29 +222,44 @@ class Mockapapella(tk.Label):
 	def resize_and_display(self, event=None):
 		if self.original_image is None:
 			return # nothing to do
-
+		self.unbind('<Configure>')
 		# easy resize code lets PIL do the work with the thumbnail method
 		new_img = self.original_image.copy()
-		new_img.thumbnail((self.winfo_width(), self.winfo_height()))
+		new_img.thumbnail((self.winfo_width()-10, self.winfo_height()-10))
 		self.photoimage = ImageTk.PhotoImage(new_img) # allows garbage collection of the old photoimage
 		self.config(image=self.photoimage)
+		self.after(100, lambda: self.bind('<Configure>', self.resize_and_display))
 
-lbl1 = Mockapapella(master)
-lbl1.grid(row=3, column=7, sticky='nsew', pady=4, padx=4, rowspan=8, columnspan=23)
+image_frame = tk.Frame(master)
+image_frame.grid(row=3, column=7, rowspan=50, columnspan=50, sticky='nsew')
+image_frame.rowconfigure(0, weight=1)
+image_frame.columnconfigure(0, weight=1)
+image_frame.rowconfigure(2, weight=1)
 
-lbl2 = Mockapapella(master)
-lbl2.grid(row=13, column=7, sticky='nsew', pady=4, padx=4, rowspan=10, columnspan=23)
+lbl1 = Mockapapella(image_frame)
+lbl1.grid(row=0, column=0, sticky='nsew', pady=4, padx=4)
+
+sep=ttk.Separator(image_frame, orient=tk.HORIZONTAL)
+sep.grid(row=1, column=0, sticky='ew')
+
+lbl2 = Mockapapella(image_frame)
+lbl2.grid(row=2, column=0, sticky='nsew', pady=4, padx=4)
 
 # set up the Queue to use for the images
 queue = Queue()
 def check_queue():
+	'''checks the queue every 100 milliseconds to see if the image labels need to be updated'''
 	if not queue.empty():
-		img1, img2 = queue.get()
-		lbl1.load(img1)
-		lbl2.load(img2)
+		item = queue.get()
+		if item == "finished":
+			popupmsg.finished_processing()
+		else:
+			img1, img2 = item
+			lbl1.load(img1)
+			lbl2.load(img2)
+
 	master.after(100, check_queue)
 check_queue()
 
 master.geometry("960x600")
 master.mainloop()
-                                                                                                                                                                                                                                                                                                                                                                   
