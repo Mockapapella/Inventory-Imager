@@ -20,18 +20,18 @@ def run_the_code(preview=False):
 		e1.get(),
 		e2.get(),
 		checkVar1.get(),
-		int(contour.get()),
-		int(dialate.get()),
-		int(blurred1.get()),
-		int(blurred2.get()),
-		int(edge_detect1a.get()),
-		int(edge_detect1b.get()),
-		int(edge_detect2a.get()),
-		int(edge_detect2b.get()),
-		int(padding_n.get()),
-		int(padding_s.get()),
-		int(padding_e.get()),
-		int(padding_w.get()),
+		contour.get(),
+		dialate.get(),
+		blurred1.get(),
+		blurred2.get(),
+		edge_detect1a.get(),
+		edge_detect1b.get(),
+		edge_detect2a.get(),
+		edge_detect2b.get(),
+		padding_n.get(),
+		padding_s.get(),
+		padding_e.get(),
+		padding_w.get(),
 		queue,
 		preview)
 	t = Thread(target=ip.run_the_code, args=args)
@@ -39,6 +39,8 @@ def run_the_code(preview=False):
 	t.start()
 
 def run_the_code_once():
+	'''a common way to reuse a chunk of code with one small difference is to
+	use a variable "flag", in this case the preview variable'''
 	run_the_code(preview=True)
 
 def reset_sliders():
@@ -65,6 +67,7 @@ class Slider(ttk.Scale):
 		lbl = tk.Label(master, text=kwargs['from_'])
 		lbl.grid(row=row, column=1, sticky=tk.E)
 		self.scaleVal = tk.IntVar(value=self.default)
+		self.get = self.scaleVal.get
 		ttk.Scale.__init__(self, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, **kwargs)
 		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
 		lbl = tk.Label(master, text="100")
@@ -263,4 +266,3 @@ check_queue()
 
 master.geometry("960x600")
 master.mainloop()
-                                                                                                          
