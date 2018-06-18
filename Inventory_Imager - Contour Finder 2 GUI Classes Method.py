@@ -391,96 +391,9 @@ def run_the_code_once(input_filepath,
 			print(e)
 	finished_processing()
 
-
-
-#https://stackoverflow.com/questions/26598010/how-do-i-create-a-button-in-python-tkinter-to-increase-integer-variable-by-1-and
-#Add 1 value to the scale every time a button is clicked
-def onClick_Add1(event=None):
-	scaleVar1.set(scaleVar1.get()+1)
-
-def onClick_Add2(event=None):
-	scaleVar2.set(scaleVar2.get()+1)
-
-def onClick_Add3(event=None):
-	scaleVar3.set(scaleVar3.get()+1)
-
-def onClick_Add4(event=None):
-	scaleVar4.set(scaleVar4.get()+1)
-
-def onClick_Add5(event=None):
-	scaleVar5.set(scaleVar5.get()+1)
-
-def onClick_Add6(event=None):
-	scaleVar6.set(scaleVar6.get()+1)
-
-def onClick_Add7(event=None):
-	scaleVar7.set(scaleVar7.get()+1)
-
-def onClick_Add8(event=None):
-	scaleVar8.set(scaleVar8.get()+1)
-
-def onClick_Add9(event=None):
-	scaleVar9.set(scaleVar9.get()+1)
-
-def onClick_Add10(event=None):
-	scaleVar10.set(scaleVar10.get()+1)
-
-def onClick_Add11(event=None):
-	scaleVar11.set(scaleVar11.get()+1)
-
-def onClick_Add12(event=None):
-	scaleVar12.set(scaleVar12.get()+1)
-
-#Subtract 1 value from the scale every time a button is clicked
-def onClick_Subtract1(event=None):
-	scaleVar1.set(scaleVar1.get()-1)
-
-def onClick_Subtract2(event=None):
-	scaleVar2.set(scaleVar2.get()-1)
-
-def onClick_Subtract3(event=None):
-	scaleVar3.set(scaleVar3.get()-1)
-
-def onClick_Subtract4(event=None):
-	scaleVar4.set(scaleVar4.get()-1)
-
-def onClick_Subtract5(event=None):
-	scaleVar5.set(scaleVar5.get()-1)
-
-def onClick_Subtract6(event=None):
-	scaleVar6.set(scaleVar6.get()-1)
-
-def onClick_Subtract7(event=None):
-	scaleVar7.set(scaleVar7.get()-1)
-
-def onClick_Subtract8(event=None):
-	scaleVar8.set(scaleVar8.get()-1)
-
-def onClick_Subtract9(event=None):
-	scaleVar9.set(scaleVar9.get()-1)
-
-def onClick_Subtract10(event=None):
-	scaleVar10.set(scaleVar10.get()-1)
-
-def onClick_Subtract11(event=None):
-	scaleVar11.set(scaleVar11.get()-1)
-
-def onClick_Subtract12(event=None):
-	scaleVar12.set(scaleVar12.get()-1)
-
 def reset_sliders():
-	scaleVar1.set(5)
-	scaleVar2.set(3)
-	scaleVar3.set(7)
-	scaleVar4.set(7)
-	scaleVar5.set(100)
-	scaleVar6.set(180)
-	scaleVar7.set(20)
-	scaleVar8.set(40)
-	scaleVar9.set(5)
-	scaleVar10.set(5)
-	scaleVar11.set(5)
-	scaleVar12.set(5)
+	for slider in Slider.sliders:
+		slider.set(slider.default)
 
 def input_directory():
 	input_directory = askdirectory(initialdir = os.getcwd(),title = "Select file")
@@ -492,73 +405,14 @@ def output_directory():
 	e2.delete(0, tk.END)
 	e2.insert(0, output_directory)
 
-#Rounds the "largest contour allowed" value to the nearest whole number
-def round_number1():
-	scaleVal1.set(round(scaleVal1.get(), 2))
-
-#Rounds the dilate value to the nearest whole number
-def round_number2():
-	scaleVal2.set(round(scaleVal2.get(), 2))
-
-#Rounds the blur1 value to the nearest odd number
-def round_number3(previous):
-	global previous_number1
-	scaleVal3_int = scaleVal3.get()
-	if previous < scaleVal3.get():
-		scaleVal3.set(round(scaleVal3_int + 1))
-	elif scaleVal3_int %2!= 1:
-		scaleVal3.set(round(scaleVal3_int - 1))
-	elif scaleVal3_int %2!= 0:
-		scaleVal3.set(round(scaleVal3_int))
-	previous_number1 = scaleVal3.get()
-
-
 def define_scale1():
 	return scaleVal3.get()
-
-#Rounds the blur2 value to the nearest odd number
-def round_number4(previous):
-	global previous_number2
-	scaleVal4_int = scaleVal4.get()
-	if previous < scaleVal4.get():
-		scaleVal4.set(round(scaleVal4_int + 1))
-	elif scaleVal4_int %2!= 1:
-		scaleVal4.set(round(scaleVal4_int - 1))
-	elif scaleVal4_int %2!= 0:
-		scaleVal4.set(round(scaleVal4_int))
-	previous_number2 = scaleVal4.get()
 
 def define_scale2():
 	return scaleVal4.get()
 
-#Rounds the "Edge Detector 1" values to the nearest whole number
-def round_number5():
-	scaleVal5.set(round(scaleVal5.get(), 2))
-
-def round_number6():
-	scaleVal6.set(round(scaleVal6.get(), 2))
-
-#Rounds the "Edge Detector 2" values to the nearest whole number
-def round_number7():
-	scaleVal7.set(round(scaleVal7.get(), 2))
-
-def round_number8():
-	scaleVal8.set(round(scaleVal8.get(), 2))
-
-#Rounds the "Padding" values to the nearest whole number
-def round_number9():
-	scaleVal9.set(round(scaleVal9.get(), 2))
-
-def round_number10():
-	scaleVal10.set(round(scaleVal10.get(), 2))
-
-def round_number11():
-	scaleVal11.set(round(scaleVal11.get(), 2))
-
-def round_number12():
-	scaleVal12.set(round(scaleVal12.get(), 2))
-
 class Slider(ttk.Scale):
+	sliders = []
 	def __init__(self, master=None, row=None, step=1, **kwargs):
 		self.step = step
 		self.default = kwargs.get('value', 0)
@@ -576,6 +430,7 @@ class Slider(ttk.Scale):
 		lbl = tk.Label(master, textvariable=self.scaleVal)
 		lbl.grid(row=row, column=5)
 		master.grid_rowconfigure(row, weight=1)
+		self.sliders.append(self)
 
 	def validate(self, args):
 		self.scaleVal.set((int(float(args))-self.default)//self.step*self.step+self.default)
@@ -644,7 +499,7 @@ checkVal1 = tk.Checkbutton(master, text="Make Square", variable=checkVar1)
 checkVal1.grid(row=4, column=0, sticky='ew')
 tk.Label(master, text="Options").grid(row=4, column=2)
 tk.Label(master, text="Current").grid(row=4, column=5)
-ttk.Button(master, text="Set Defaults", command=lambda: reset_sliders()).grid(row=4, column=4)
+ttk.Button(master, text="Set Defaults", command=reset_sliders).grid(row=4, column=4)
 
 master.grid_columnconfigure(2, weight=1)
 
@@ -671,14 +526,14 @@ blurred2 = Slider(master, row=12, from_=1, to=99, value=7, step=2)
 #Edge Detector 1
 master.grid_rowconfigure(13, weight=1)
 tk.Label(master, text="Edge Detector 1 (Default: 100,180)").grid(row=13, column=2, sticky=tk.S)
-edge_detect1a = Slider(master, row=14, from_=1, to=99, value=100)
-edge_detect1b = Slider(master, row=15, from_=1, to=99, value=180)
+edge_detect1a = Slider(master, row=14, from_=1, to=300, value=100)
+edge_detect1b = Slider(master, row=15, from_=1, to=300, value=180)
 
 #Edge Detector 2
 master.grid_rowconfigure(16, weight=1)
 tk.Label(master, text="Edge Detector 2 (Default: 20,40)").grid(row=16, column=2, sticky=tk.S)
-edge_detect2a = Slider(master, row=17, from_=1, to=99, value=20)
-edge_detect2b = Slider(master, row=18, from_=1, to=99, value=40)
+edge_detect2a = Slider(master, row=17, from_=1, to=100, value=20)
+edge_detect2b = Slider(master, row=18, from_=1, to=100, value=40)
 
 #Final Image Padding
 master.grid_rowconfigure(19, weight=1)
