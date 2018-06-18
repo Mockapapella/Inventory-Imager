@@ -245,7 +245,6 @@ class GUI(tk.Tk):
 		self.columnconfigure(2, weight=1) # images column gets all leftover horizontal space
 		self.rowconfigure(2, weight=1) # options row gets all leftover vertical space
 
-
 		self.queue = Queue() # set up the Queue to use for the images
 		self.status_q = Queue() # set up the Queue to use for status messages
 
