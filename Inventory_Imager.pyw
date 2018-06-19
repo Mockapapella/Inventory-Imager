@@ -84,22 +84,18 @@ class StepScale(ttk.Scale):
 class Slider(StepScale):
 	sliders = []
 	def __init__(self, master=None, row=None, **kwargs):
-		self.default = kwargs.get('value', 0)
 		btn = ttk.Button(master, text="-", width=2, command=self.subtract)
 		btn.grid(row=row, column=0, sticky=tk.E)
 		lbl = tk.Label(master, text=kwargs.get('from_',''))
 		lbl.grid(row=row, column=1, sticky=tk.E)
-		self.scaleVal = tk.IntVar(value=self.default)
-		self.get = self.scaleVal.get
-		StepScale.__init__(self, master, orient=tk.HORIZONTAL, variable=self.scaleVal, length=400, **kwargs)
-		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
+		StepScale.__init__(self, master, orient=tk.HORIZONTAL, length=400, **kwargs)
+		self.grid(row=row, column=2, sticky='ew')
 		lbl = tk.Label(master, text=kwargs.get('to', ''))
 		lbl.grid(row=row, column=3)
 		btn = ttk.Button(master, text="+", width=2, command=self.add)
 		btn.grid(row=row, column=4)
-		lbl = tk.Label(master, textvariable=self.scaleVal)
+		lbl = tk.Label(master, textvariable=self.variable)
 		lbl.grid(row=row, column=5)
-		master.grid_rowconfigure(row, weight=1)
 		self.sliders.append(self)
 
 	def subtract(self):
@@ -111,7 +107,7 @@ class Slider(StepScale):
 	@classmethod
 	def reset_all(cls):
 		for slider in cls.sliders:
-			slider.set(slider.default)
+			slider.set(slider.value)
 
 class Menubar(tk.Menu):
 	def __init__(self, master=None, **kwargs):
