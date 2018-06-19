@@ -56,9 +56,9 @@ class StepScale(ttk.Scale):
 		self.variable.set(self.value)
 		self.force_int = force_int
 		self.resolution = int(self.range_ / self.step)
-		value = float(self.value) / self.step
-		ttk.Scale.__init__(self, master, to=self.resolution, value=value, command=self.validate, **kwargs)
-		self.set, self.get = self.variable.set, self.variable.get
+		ttk.Scale.__init__(self, master, to=self.resolution, command=self.validate, **kwargs)
+		self.get = self.variable.get
+		self.set(self.value)
 
 	def validate(self, args):
 		percentage = ttk.Scale.get(self) / float(self.resolution)
@@ -69,9 +69,17 @@ class StepScale(ttk.Scale):
 				real_value = int(round(real_value+self.step-diff)) # round up
 			else:
 				real_value = int(round(real_value-diff)) # round down
-		self.set(real_value)
+		self.variable.set(real_value)
 		if self.command is not None:
 			self.command(real_value)
+
+	def set(self, value):
+		if value > self.to:
+			value = self.to
+		elif value < self.from_:
+			value = self.from_
+		ttk.Scale.set(self, float(value-self.from_) / self.step)
+		self.variable.set(value)
 
 class Slider(StepScale):
 	sliders = []
@@ -334,4 +342,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-                                                                                                                                                      
