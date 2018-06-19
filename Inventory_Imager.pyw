@@ -42,50 +42,20 @@ class DirInput(tk.Frame):
 		widget.delete(0, tk.END)
 		widget.insert(0, directory)
 
-class StepScale(ttk.Scale):
-	'''ttk.Scale increments by 1, and apparently there's no way to change that
-	So this class lies to the user instead'''
-	def __init__(self, master=None, step=1, force_int=True, **kwargs):
-		self.from_ = kwargs.pop('from_', 0)
-		self.to = kwargs.pop('to', 1)
-		self.step = step
-		self.range_ = self.to - self.from_
-		self.value = kwargs.pop('value', 0)
-		self.command = kwargs.pop('command', None)
-		self.variable = kwargs.pop('variable', tk.IntVar()) # actual user value
-		self.variable.set(self.value)
-		self.force_int = force_int
-		self.resolution = int(self.range_ / self.step)
-		value = float(self.value) / self.step
-		ttk.Scale.__init__(self, master, to=self.resolution, value=value, command=self.validate, **kwargs)
-		self.set, self.get = self.variable.set, self.variable.get
-
-	def validate(self, args):
-		percentage = ttk.Scale.get(self) / float(self.resolution)
-		real_value = percentage * self.range_ + self.from_
-		if self.force_int:
-			diff = (real_value-self.value) % self.step
-			if diff > self.step / 2.0:
-				real_value = int(round(real_value+self.step-diff)) # round up
-			else:
-				real_value = int(round(real_value-diff)) # round down
-		self.set(real_value)
-		if self.command is not None:
-			self.command(real_value)
-
-class Slider(StepScale):
+class Slider(ttk.Scale):
 	sliders = []
-	def __init__(self, master=None, row=None, **kwargs):
+	def __init__(self, master=None, row=None, step=1, **kwargs):
+		self.step = step
 		self.default = kwargs.get('value', 0)
 		btn = ttk.Button(master, text="-", width=2, command=self.subtract)
 		btn.grid(row=row, column=0, sticky=tk.E)
-		lbl = tk.Label(master, text=kwargs.get('from_',''))
+		lbl = tk.Label(master, text=kwargs['from_'])
 		lbl.grid(row=row, column=1, sticky=tk.E)
 		self.scaleVal = tk.IntVar(value=self.default)
 		self.get = self.scaleVal.get
-		StepScale.__init__(self, master, orient=tk.HORIZONTAL, variable=self.scaleVal, length=400, **kwargs)
+		ttk.Scale.__init__(self, master, orient=tk.HORIZONTAL, variable=self.scaleVal, command=self.validate, length=400, **kwargs)
 		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
-		lbl = tk.Label(master, text=kwargs.get('to', ''))
+		lbl = tk.Label(master, text="100")
 		lbl.grid(row=row, column=3)
 		btn = ttk.Button(master, text="+", width=2, command=self.add)
 		btn.grid(row=row, column=4)
@@ -93,6 +63,9 @@ class Slider(StepScale):
 		lbl.grid(row=row, column=5)
 		master.grid_rowconfigure(row, weight=1)
 		self.sliders.append(self)
+
+	def validate(self, args):
+		self.scaleVal.set((int(float(args))-self.default)//self.step*self.step+self.default)
 
 	def subtract(self):
 		self.set(self.get()-self.step)
