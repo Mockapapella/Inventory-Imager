@@ -56,9 +56,9 @@ class StepScale(ttk.Scale):
 		self.variable.set(self.value)
 		self.force_int = force_int
 		self.resolution = int(self.range_ / self.step)
-		value = float(self.value) / self.step
-		ttk.Scale.__init__(self, master, to=self.resolution, value=value, command=self.validate, **kwargs)
-		self.set, self.get = self.variable.set, self.variable.get
+		ttk.Scale.__init__(self, master, to=self.resolution, command=self.validate, **kwargs)
+		self.get = self.variable.get
+		self.set(self.value)
 
 	def validate(self, args):
 		percentage = ttk.Scale.get(self) / float(self.resolution)
@@ -69,29 +69,33 @@ class StepScale(ttk.Scale):
 				real_value = int(round(real_value+self.step-diff)) # round up
 			else:
 				real_value = int(round(real_value-diff)) # round down
-		self.set(real_value)
+		self.variable.set(real_value)
 		if self.command is not None:
 			self.command(real_value)
+
+	def set(self, value):
+		if value > self.to:
+			value = self.to
+		elif value < self.from_:
+			value = self.from_
+		ttk.Scale.set(self, float(value-self.from_) / self.step)
+		self.variable.set(value)
 
 class Slider(StepScale):
 	sliders = []
 	def __init__(self, master=None, row=None, **kwargs):
-		self.default = kwargs.get('value', 0)
 		btn = ttk.Button(master, text="-", width=2, command=self.subtract)
 		btn.grid(row=row, column=0, sticky=tk.E)
 		lbl = tk.Label(master, text=kwargs.get('from_',''))
 		lbl.grid(row=row, column=1, sticky=tk.E)
-		self.scaleVal = tk.IntVar(value=self.default)
-		self.get = self.scaleVal.get
-		StepScale.__init__(self, master, orient=tk.HORIZONTAL, variable=self.scaleVal, length=400, **kwargs)
-		self.grid(row=row, column=2, sticky='ew', ipadx=0, ipady=0)
+		StepScale.__init__(self, master, orient=tk.HORIZONTAL, length=400, **kwargs)
+		self.grid(row=row, column=2, sticky='ew')
 		lbl = tk.Label(master, text=kwargs.get('to', ''))
 		lbl.grid(row=row, column=3)
 		btn = ttk.Button(master, text="+", width=2, command=self.add)
 		btn.grid(row=row, column=4)
-		lbl = tk.Label(master, textvariable=self.scaleVal)
+		lbl = tk.Label(master, textvariable=self.variable)
 		lbl.grid(row=row, column=5)
-		master.grid_rowconfigure(row, weight=1)
 		self.sliders.append(self)
 
 	def subtract(self):
@@ -103,7 +107,7 @@ class Slider(StepScale):
 	@classmethod
 	def reset_all(cls):
 		for slider in cls.sliders:
-			slider.set(slider.default)
+			slider.set(slider.value)
 
 class Menubar(tk.Menu):
 	def __init__(self, master=None, **kwargs):
