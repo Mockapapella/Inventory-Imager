@@ -9,6 +9,8 @@ from PIL import Image, ImageTk
 from operator import itemgetter
 from functools import partial
 
+import popupmsg
+
 def CannyEdge1(image, filename, blur_value, edge_detector_1_lower_bound, edge_detector_1_upper_bound):
 	#--Bolt Image and convert to Gray--#
 	img1 = cv2.imread(image)
@@ -184,24 +186,25 @@ def run_the_code(input_filepath,
 
 	slog = partial(log, status_q)
 	if input_filepath == "":
-		input_filepath_error()
+		popupmsg.input_filepath_error()
 		return
 	if blur1 %2 == 0 or blur2 %2 == 0:
-		blur_error()
+		popupmsg.blur_error()
 		return
 	files = glob.glob(os.path.join(input_filepath, "*.jpg"))
 	if preview:
-		del files[1:] # preview just uses the first image
+		del files[1:] # preview just uses the first image; remove the rest from the list
 	for i, filename in enumerate(files, 1):
-		fn = "{} ({}/{})".format(os.path.basename(filename), i, len(files))
+		fn = os.path.basename(filename)
+		num = "({}/{})".format(i, len(files))
 		try:
-			slog(fn, "- Apply canny edge detection")
+			slog(fn, num, "- Apply canny edge detection")
 			canny_inv = CannyEdge1(filename,
 											   filename,
 											   blur1,
 											   edge_detector_1_lower_bound,
 											   edge_detector_1_upper_bound)
-			slog(fn, "- Crop image to item size")
+			slog(fn, num, "- Crop image to item size")
 			img_crop = ImageItemCrop(canny_inv,
 												 filename,
 												 padding_N,
@@ -218,62 +221,36 @@ def run_the_code(input_filepath,
 			unsquare_image = Combination(mask,
 													 img_crop_copy)
 
-			slog(fn, "- saving")
+			slog(fn, num, "- saving")
 			if square_checkbox == 1:
-				square_image = SquareImage(unsquare_image,
+				new_image = SquareImage(unsquare_image,
 														   filename,
 														   output_filepath)
+			else:
+				new_image = unsquare_image
 
-				#--Save Processed Image--#
-				filename_array = filename
-				filename_array = filename.split('\\')
-				filename_array_item = filename_array[1]
+			#--Save Processed Image--#
+			#--Write File--#
+			'''
+			If no output directory is specified, make one in the current directory
+			'''
+			if output_filepath == "":
+				if not os.path.exists("Output/"):
+					os.mkdir("Output/")
+				dirname = "Output"
+				cv2.imwrite(os.path.join(dirname, fn), new_image)
+			else:
+				cv2.imwrite(os.path.join(output_filepath, fn), new_image)
 
-				#--Write File--#
-				'''
-				If no output directory is specified, make one in the current directory
-				'''
-				if output_filepath == "":
-					if not os.path.exists("Output/"):
-						os.mkdir("Output/")
-					dirname = "Output"
-					cv2.imwrite(os.path.join(dirname, filename_array_item), square_image)
-				else:
-					cv2.imwrite(os.path.join(output_filepath, filename_array_item), square_image)
+			b,g,r = cv2.split(new_image)
+			new_image = cv2.merge((r,g,b))
+			new_image = Image.fromarray(new_image)
 
-				b,g,r = cv2.split(square_image)
-				square_image = cv2.merge((r,g,b))
-				square_image = Image.fromarray(square_image)
-
-				#--Update the images on display in the window--#
-				if queue:
-					queue.put((Image.open(filename), square_image))
-
-			elif square_checkbox == 0:
-				#--Save Processed Image--#
-				filename_array = filename
-				filename_array = filename.split('\\')
-				filename_array_item = filename_array[1]
-
-				#--Write File--#
-				'''
-				If no output directory is specified, make one in the current directory
-				'''
-				if output_filepath == "":
-					if not os.path.exists("Output/"):
-						os.mkdir("Output/")
-					dirname = "Output"
-					cv2.imwrite(os.path.join(dirname, filename_array_item), unsquare_image)
-				else:
-					cv2.imwrite(os.path.join(output_filepath, filename_array_item), unsquare_image)
-
-				b,g,r = cv2.split(unsquare_image)
-				unsquare_image = cv2.merge((r,g,b))
-				unsquare_image = Image.fromarray(unsquare_image)
-				if queue:
-					queue.put((Image.open(filename), unsquare_image))
+			#--Update the images on display in the window--#
+			if queue:
+				queue.put((Image.open(filename), new_image))
 		except Exception as e:
-			slog("ERROR:", e)
+			slog("ERROR:", fn, num, e)
 	if queue:
 		queue.put('finished')
 
