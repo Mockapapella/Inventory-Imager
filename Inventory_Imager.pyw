@@ -132,11 +132,12 @@ class Menubar(tk.Menu):
 
 		# Profiles Menu
 		Profiles = tk.Menu(self, tearoff=0)
-		Profiles.add_command(label="Profile 1", command=popupmsg.not_supported_yet)
-		Profiles.add_command(label="Profile 2", command=popupmsg.not_supported_yet)
-		Profiles.add_command(label="Profile 3", command=popupmsg.not_supported_yet)
+		profile_directory = "Profiles/"
+		for profile in os.listdir(profile_directory):
+			profile_name = os.path.splitext(profile)[0]
+			Profiles.add_command(label=profile_name, command=popupmsg.not_supported_yet)
 		Profiles.add_separator()
-		Profiles.add_command(label="Add Profile", command=popupmsg.not_supported_yet)
+		Profiles.add_command(label="Add Profile", command=profiles.create_profile)
 		self.add_cascade(label="Profiles", menu=Profiles)
 
 

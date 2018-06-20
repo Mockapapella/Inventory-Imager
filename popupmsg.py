@@ -75,7 +75,7 @@ def Blur_2(master=None):
 def input_filepath_error(master=None):
 	WarningPopup(master,
 		title="Error",
-		msg="Specify Input Folder")
+		msg="Specify Input Folder.")
 
 def blur_error(master=None):
 	WarningPopup(master,
@@ -85,9 +85,23 @@ def blur_error(master=None):
 def finished_processing(master=None):
 	InfoPopup(master,
 		title="Finish Message",
-		msg="Image processing completed")
+		msg="Image processing completed.")
 
 def not_supported_yet(master=None):
 	WarningPopup(master,
-		title="Support Error",
+		title="Error",
 		msg="This feature is not yet supported.")
+
+def no_profile_name(master=None):
+	WarningPopup(master,
+		title="Error",
+		msg="Please enter a name for the profile.")
+
+def profile_already_exists(master=None):
+	WarningPopup(master,
+		title="Error",
+		msg="Profile already exists. Overwrite?")
+
+
+# root=tk.Tk()
+# root.mainloop()

@@ -29,11 +29,11 @@ def ImageItemCrop(image, filename, padding_N, padding_S, padding_E, padding_W):
 	img = Image.fromarray(image)
 	rgb = img.convert('RGB')
 	for x in range(img.size[0]):
-	    for y in range(img.size[1]):
-		    r, g, b, = rgb.getpixel((x, y))
-		    if r < rgb_threshold and g < rgb_threshold and b < rgb_threshold:
-			    coords = (x,y)
-			    listxy.append(coords)
+		for y in range(img.size[1]):
+			r, g, b, = rgb.getpixel((x, y))
+			if r < rgb_threshold and g < rgb_threshold and b < rgb_threshold:
+				coords = (x,y)
+				listxy.append(coords)
 	'''Get first and last X value'''
 	sorted(listxy,key=itemgetter(0))
 	x_low = listxy[0][0] - padding_E #20
@@ -205,8 +205,8 @@ def run_the_code(input_filepath,
 			slog(fn, num, "- saving")
 			if square_checkbox == 1:
 				new_image = SquareImage(unsquare_image,
-									    filename,
-									    output_filepath)
+										filename,
+										output_filepath)
 			else:
 				new_image = unsquare_image
 
@@ -214,7 +214,7 @@ def run_the_code(input_filepath,
 			'''
 			If no output directory is specified, make one in the current directory
 			'''
-			if output_filepath == "":
+			if output_filepath == "" or output_filepath == "Output":
 				if not os.path.exists("Output/"):
 					os.mkdir("Output/")
 				dirname = "Output"
