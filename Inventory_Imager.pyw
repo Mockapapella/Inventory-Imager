@@ -17,6 +17,7 @@ from threading import Thread
 
 import popupmsg
 import image_process as ip
+import profiles
 
 class DirInput(tk.Frame):
 	def __init__(self, master=None, **kwargs):
@@ -41,6 +42,7 @@ class DirInput(tk.Frame):
 		directory = askdirectory(initialdir=os.getcwd(), title = "Select file")
 		widget.delete(0, tk.END)
 		widget.insert(0, directory)
+
 
 class StepScale(ttk.Scale):
 	'''ttk.Scale increments by 1, and apparently there's no way to change that
@@ -81,6 +83,7 @@ class StepScale(ttk.Scale):
 		ttk.Scale.set(self, float(value-self.from_) / self.step)
 		self.variable.set(value)
 
+
 class Slider(StepScale):
 	sliders = []
 	def __init__(self, master=None, row=None, **kwargs):
@@ -109,13 +112,14 @@ class Slider(StepScale):
 		for slider in cls.sliders:
 			slider.set(slider.value)
 
+
 class Menubar(tk.Menu):
 	def __init__(self, master=None, **kwargs):
 		tk.Menu.__init__(self, master, **kwargs)
 
 		# Info Menu
 		Info = tk.Menu(self, tearoff=0)
-		Info.add_command(label="Largest Contour Allowed", command=popupmsg.contour)
+		Info.add_command(label="Smallest Contour Allowed", command=popupmsg.contour)
 		Info.add_command(label="Dilate", command=popupmsg.dilate)
 		Info.add_command(label="Blur 1", command=popupmsg.Blur_1)
 		Info.add_command(label="Blur 2", command=popupmsg.Blur_2)
@@ -128,12 +132,13 @@ class Menubar(tk.Menu):
 
 		# Profiles Menu
 		Profiles = tk.Menu(self, tearoff=0)
-		Profiles.add_command(label="Profile 1")
-		Profiles.add_command(label="Profile 2")
-		Profiles.add_command(label="Profile 3")
+		Profiles.add_command(label="Profile 1", command=popupmsg.not_supported_yet)
+		Profiles.add_command(label="Profile 2", command=popupmsg.not_supported_yet)
+		Profiles.add_command(label="Profile 3", command=popupmsg.not_supported_yet)
 		Profiles.add_separator()
-		Profiles.add_command(label="Add Profile")
+		Profiles.add_command(label="Add Profile", command=popupmsg.not_supported_yet)
 		self.add_cascade(label="Profiles", menu=Profiles)
+
 
 class Options(ttk.LabelFrame):
 	def __init__(self, master=None, **kwargs):
@@ -147,8 +152,8 @@ class Options(ttk.LabelFrame):
 		btn = ttk.Button(self, text="Reset All to Defaults", command=Slider.reset_all)
 		btn.place(relx=1, rely=0, anchor='ne')
 
-		#Largest Contours Allowed
-		tk.Label(self, text="Largest Contour Allowed (Default: 5)").grid(row=5, column=2, sticky=tk.S)
+		#Smallest Contours Allowed
+		tk.Label(self, text="Smallest Contour Allowed (Default: 5% of Total Image)").grid(row=5, column=2, sticky=tk.S)
 		self.contour = Slider(self, row=6, from_=1, to=100, value=5)
 
 		#Dilate
@@ -175,10 +180,11 @@ class Options(ttk.LabelFrame):
 
 		#Final Image Padding
 		tk.Label(self, text="Padding (Default: N5,S5,E5,W5)").grid(row=19, column=2, sticky=tk.S)
-		self.padding_n = Slider(self, row=20, from_=1, to=40, value=5)
-		self.padding_s = Slider(self, row=21, from_=1, to=40, value=5)
-		self.padding_e = Slider(self, row=22, from_=1, to=40, value=5)
-		self.padding_w = Slider(self, row=23, from_=1, to=40, value=5)
+		self.padding_n = Slider(self, row=20, from_=0, to=80, value=5)
+		self.padding_s = Slider(self, row=21, from_=0, to=80, value=5)
+		self.padding_e = Slider(self, row=22, from_=0, to=80, value=5)
+		self.padding_w = Slider(self, row=23, from_=0, to=80, value=5)
+
 
 class LowerButtons(tk.Frame):
 	def __init__(self, master=None, **kwargs):
@@ -193,10 +199,11 @@ class LowerButtons(tk.Frame):
 		btn = ttk.Button(self, text='Preview', command=master.run_the_code_once)
 		btn.pack(side=tk.LEFT)
 
+
 class Mockapapella(tk.Label):
 	''' a Label that resizes the contained image'''
 	def __init__(self, master=None, **kwargs):
-		tk.Label.__init__(self, master, bg='white', **kwargs)
+		tk.Label.__init__(self, master, **kwargs)
 		self.original_image = None
 		self.photoimage = None
 
@@ -218,6 +225,7 @@ class Mockapapella(tk.Label):
 		self.config(image=self.photoimage)
 		self.after(150, lambda: self.bind('<Configure>', self.resize_and_display))
 
+
 class StatusBar(tk.Label):
 	def __init__(self, master=None, queue=None, **kwargs):
 		tk.Label.__init__(self, master, **kwargs)
@@ -229,6 +237,7 @@ class StatusBar(tk.Label):
 			color = 'red' if data.lower().startswith('error') else 'black'
 			self.config(text=data, fg=color)
 		self.after(100, self.check_queue)
+
 
 class Images(tk.Frame):
 	def __init__(self, master=None, **kwargs):
@@ -262,16 +271,17 @@ class Images(tk.Frame):
 
 		self.after(100, self.check_queue)
 
+
 class GUI(tk.Tk):
 	def __init__(self, **kwargs):
 		tk.Tk.__init__(self, **kwargs)
 
 		try:
-			self.iconbitmap("Logo.ico")
+			self.iconbitmap("Icons/Logo.ico")
 		except:
 			print("Linux sucks")
 		self.title("Inventory Imager")
-		self.geometry("960x600")
+		self.geometry("1200x700")
 
 		self.columnconfigure(2, weight=1) # images column gets all leftover horizontal space
 		self.rowconfigure(2, weight=1) # options row gets all leftover vertical space
@@ -285,14 +295,14 @@ class GUI(tk.Tk):
 		self.directories.grid(row=0, column=0, columnspan=3, sticky='ew')
 
 		# I think these are ugly, but go ahead and uncomment them if you want
-		#~ sep = ttk.Separator(self, orient=tk.HORIZONTAL)
-		#~ sep.grid(row=1, column=0, columnspan=3, sticky='ew', pady=4)
+		# sep = ttk.Separator(self, orient=tk.HORIZONTAL)
+		# sep.grid(row=1, column=0, columnspan=3, sticky='ew', pady=4)
 
 		self.options = Options(self)
 		self.options.grid(row=2, column=0, padx=4, pady=4, sticky='nsew')
 
-		#~ sep = ttk.Separator(self, orient=tk.VERTICAL)
-		#~ sep.grid(row=1, column=1, rowspan=3, sticky='ns')
+		# sep = ttk.Separator(self, orient=tk.VERTICAL)
+		# sep.grid(row=1, column=1, rowspan=3, sticky='ns')
 
 		lower = LowerButtons(self)
 		lower.grid(row=3, column=0, pady=4)
@@ -332,9 +342,11 @@ class GUI(tk.Tk):
 		use a variable "flag", in this case the preview variable'''
 		self.run_the_code(preview=True)
 
+
 def main():
 	root = GUI()
 	root.mainloop()
+
 
 if __name__ == '__main__':
 	main()

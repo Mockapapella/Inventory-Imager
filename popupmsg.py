@@ -13,7 +13,7 @@ class Popup(tk.Toplevel):
 	def __init__(self, master=None, title='', msg='', **kwargs):
 		tk.Toplevel.__init__(self, master, **kwargs)
 		self.title(title)
-		self.geometry("300x100")
+		self.geometry("350x125")
 
 		label = ttk.Label(self, text=msg, wrap=300)
 		label.pack(side="top", pady=10, padx=10)
@@ -24,7 +24,7 @@ class InfoPopup(Popup):
 	def __init__(self, master=None, **kwargs):
 		Popup.__init__(self, master, **kwargs)
 		try: # only windows supports ico files
-			self.iconbitmap("Logo.ico")
+			self.iconbitmap("Icons/Logo.ico")
 		except:
 			pass
 
@@ -32,7 +32,7 @@ class WarningPopup(Popup):
 	def __init__(self, master=None, **kwargs):
 		Popup.__init__(self, master, **kwargs)
 		try: # only windows supports ico files
-			self.iconbitmap("Warning.ico")
+			self.iconbitmap("Icons/Warning.ico")
 		except:
 			pass
 
@@ -86,3 +86,8 @@ def finished_processing(master=None):
 	InfoPopup(master,
 		title="Finish Message",
 		msg="Image processing completed")
+
+def not_supported_yet(master=None):
+	WarningPopup(master,
+		title="Support Error",
+		msg="This feature is not yet supported.")
