@@ -14,9 +14,9 @@ import popupmsg
 def CannyEdge1(image, filename, blur_value, edge_detector_1_lower_bound, edge_detector_1_upper_bound):
 	#--Read in the Image--#
 	img1 = cv2.imread(image)
-	# img1_resize = cv2.resize(img1, (960, 540))
+	img1_resize = cv2.resize(img1, (960, 540))
 	#--Edge Threshold--#
-	blurred = cv2.GaussianBlur(img1, (blur_value,blur_value), 0) #Replace img1 with img1_resize to process faster
+	blurred = cv2.GaussianBlur(img1_resize, (blur_value,blur_value), 0) #Replace img1 with img1_resize to process faster
 	canny = cv2.Canny(blurred, edge_detector_1_lower_bound, edge_detector_1_upper_bound) #100,180
 	canny_inv = cv2.bitwise_not(canny)
 	return canny_inv
@@ -44,8 +44,8 @@ def ImageItemCrop(image, filename, padding_N, padding_S, padding_E, padding_W):
 	y_high = listxy[-1][1] + padding_S #20
 	#--Take the coordinates of the square and use them to get the ROI of the original image--#
 	filename = cv2.imread(filename)
-	# filename_resize = cv2.resize(filename, (960, 540))
-	crop = filename[int(y_low):int(y_high), int(x_low):int(x_high)] #Replace filename with filename_resize to process faster
+	filename_resize = cv2.resize(filename, (960, 540))
+	crop = filename_resize[int(y_low):int(y_high), int(x_low):int(x_high)] #Replace filename with filename_resize to process faster
 	return crop
 
 
@@ -89,7 +89,7 @@ def segment(path, blur2, smallest_contour_allowed, edge_detector_2_lower_bound, 
 						CannyEdge2(blurred[:,:, 1], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation),
 						CannyEdge2(blurred[:,:, 2], edge_detector_2_lower_bound, edge_detector_2_upper_bound, dilation)]), axis=0)
 	# Noise reduction trick, from http://sourceforge.net/p/octave/image/ci/default/tree/inst/edge.m#l182
-	mean = np.mean(canny)
+	mean = np.mean(blurred)
 	# Zero any values less than mean. This reduces a lot of noise.
 	canny[canny <= mean] = 0;
 	canny[canny > 255] = 255;
@@ -115,7 +115,7 @@ def Combination(mask, crop):
 	return result
 
 
-def SquareImage(image, filename, output_filepath):
+def SquareImage(image):
 	#--Figure out which side of the image is longer--#
 	img1 = image
 	height = np.size(img1,0)
@@ -204,9 +204,7 @@ def run_the_code(input_filepath,
 										 img_crop_copy)
 			slog(fn, num, "- saving")
 			if square_checkbox == 1:
-				new_image = SquareImage(unsquare_image,
-										filename,
-										output_filepath)
+				new_image = SquareImage(unsquare_image)
 			else:
 				new_image = unsquare_image
 

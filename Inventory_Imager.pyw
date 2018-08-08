@@ -280,7 +280,7 @@ class GUI(tk.Tk):
 		try:
 			self.iconbitmap("Icons/Logo.ico")
 		except:
-			print("Linux sucks")
+			print("Icons not supported for Linux")
 		self.title("Inventory Imager")
 		self.geometry("1200x700")
 

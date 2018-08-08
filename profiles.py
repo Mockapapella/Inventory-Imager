@@ -53,7 +53,7 @@ class ProfilePopup(tk.Toplevel):
 							  self.options.dialate.get(),
 							  self.options.blurred1.get(),
 							  self.options.blurred2.get(),
-							  self.options.edge_detect1a.get(),
+						  self.options.edge_detect1a.get(),
 							  self.options.edge_detect1b.get(),
 							  self.options.edge_detect2a.get(),
 							  self.options.edge_detect2b.get(),
